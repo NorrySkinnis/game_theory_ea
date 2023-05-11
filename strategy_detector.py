@@ -2,7 +2,7 @@ import numpy as np
 
 
 class StrategyDetector:
-	def __init__(self, games=10, possible_strats=("TitForTat", "Dove", "Hawk", "Random")):
+	def __init__(self, possible_strats, games=10):
 		self.games = games
 		self.detection_strategy = ["C", "C", "C", "C", "C", "D", "D", "D", "D", "D"]
 		self.change = 5
@@ -90,13 +90,11 @@ class Random(PlayerStrategy):
 		self.history.append(np.random.choice(["C", "D"]))
 		return self.history[-1]
 
+
 if __name__ == "__main__":
-	detector = StrategyDetector()
-	verdict = detector.detect(player=TitForTat())
-	print(verdict)
-	verdict = detector.detect(player=Dove())
-	print(verdict)
-	verdict = detector.detect(player=Hawk())
-	print(verdict)
-	verdict = detector.detect(player=Random())
-	print(verdict)
+	possible_strats = [TitForTat(), Dove(), Hawk(), Random()]
+	detector = StrategyDetector([c.name for c in possible_strats])
+
+	for strat in possible_strats:
+		verdict = detector.detect(player=strat)
+		print(f"Player {strat.name} is seen as: {verdict}")
