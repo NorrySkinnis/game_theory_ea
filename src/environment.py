@@ -71,6 +71,7 @@ class Environment:
     def evolve(self)->None:
         # TODO: implement evolution algorithm
         # TODO: reset player rewards
+        # TODO: vectorize computations
         pass
         
     def sample_opponents(self, player:Player, n_matchups:int)-> list[Player]:
