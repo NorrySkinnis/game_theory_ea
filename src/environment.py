@@ -1,5 +1,6 @@
 import numpy as np
 from player import Player
+import time
 
 class PrisonersDilemma:
 
@@ -54,17 +55,22 @@ class Environment:
             returns:
             players: list of surving players after n_generations
             """
-        for g in range(n_generations):
+        for _ in range(n_generations):
+            #start_time = time.time()
             for p in self.players:
                 opponent_ids = self.sample_opponents(p, n_matchups)
                 if len(opponent_ids) == 0:
                     continue
                 self.simulate_game(p, opponent_ids, n_games)
-            return
+                # self.simulate_game_2(p, opponent_ids, n_games)
+            # end_time = time.time()
+            # execution_time = end_time - start_time
+            # print("Execution time:", execution_time, "seconds")
             self.evolve()
     
     def evolve(self)->None:
         # TODO: implement evolution algorithm
+        # TODO: reset player rewards
         pass
         
     def sample_opponents(self, player:Player, n_matchups:int)-> list[Player]:
@@ -87,6 +93,7 @@ class Environment:
                 continue
             opponent_ids.append(opponent_id)
             self.players[opponent_id].opponents.append(player.identifier)
+            player.opponents.append(opponent_id)
         return opponent_ids
     
     def simulate_game(self, player:Player, opponent_ids:list[int], n_games:int) -> None: 
@@ -122,6 +129,23 @@ class Environment:
             for i, id in enumerate(opponent_ids):
                 opponent = self.players[id]
                 opponent.rewards += opponent_rewards[i]
+
+    # Same functionality, twice as slow
+    # def simulate_game_2(self, player:Player, opponent_ids:list[int], n_games:int) -> None:
+
+    #     n = len(opponent_ids)
+    #     opponent_histories = [[] for _ in range(n)]
+    #     player.history = [[] for _ in range(n)]
+    #     for _ in range(n_games):
+    #         for i, id in enumerate(opponent_ids): 
+    #             opponent = self.players[id]
+    #             o_action = opponent.act(player.history[i])
+    #             opponent_histories[i].append(o_action[0])
+    #             p_action = player.act(opponent_histories[i])
+    #             player.history[i].append(p_action[0])
+    #             rewards = self.game.payoff_matrix[p_action[0], o_action[0]]
+    #             player.rewards += rewards[0]
+    #             opponent.rewards += rewards[1]
 
     def create_players(self, n_players:int)-> list[Player]:
         

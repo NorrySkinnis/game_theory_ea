@@ -9,8 +9,8 @@ from environment import Environment as env
 
 
 if __name__=='__main__':
-    n_games = 1
-    n_matchups = 1
+    n_games = 1000
+    n_matchups = 100
     n_generations = 10
 
     env = env(n_players=10)
