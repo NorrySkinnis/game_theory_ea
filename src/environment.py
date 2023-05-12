@@ -57,6 +57,8 @@ class Environment:
         for g in range(n_generations):
             for p in self.players:
                 opponent_ids = self.sample_opponents(p, n_matchups)
+                if len(opponent_ids) == 0:
+                    continue
                 self.simulate_game(p, opponent_ids, n_games)
             return
             self.evolve()
