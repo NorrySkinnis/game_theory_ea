@@ -41,7 +41,6 @@ class Environment:
             fitness: fitness function for players
             """ 
         self.players = self.create_players(n_players)
-        self.player_histories = [p.history for p in self.players]
         self.game = game
         self.fitness = fitness 
 
@@ -59,7 +58,7 @@ class Environment:
             for p in self.players:
                 opponent_ids = self.sample_opponents(p, n_matchups)
                 self.simulate_game(p, opponent_ids, n_games)
-                return
+            return
             self.evolve()
     
     def evolve(self)->None:
@@ -85,6 +84,7 @@ class Environment:
             elif self.players[opponent_id].opponents == n_matchups:
                 continue
             opponent_ids.append(opponent_id)
+            self.players[opponent_id].opponents.append(player.identifier)
         return opponent_ids
     
     def simulate_game(self, player:Player, opponent_ids:list[int], n_games:int) -> None: 
@@ -101,26 +101,25 @@ class Environment:
         opponent_histories = [[] for _ in range(n)]  
         player.history = [[] for _ in range(n)] 
         for game_i in range(n_games):
+            opponent_actions = []
             for i, id in enumerate(opponent_ids): 
                 opponent = self.players[id]
                 o_action = opponent.act(player.history[i])
+                opponent_actions.append(o_action[0])
                 opponent_histories[i].append(o_action[0])
             p_actions = player.act(opponent_histories).reshape(-1,1)
             if game_i == 0:
                 player.history = p_actions
             else:
                 player.history = np.hstack((player.history, p_actions))
-            rewards = self.game.payoff_matrix[(1,1), (1,1)]
-            # print(np.ravel(opponent_histories))
-            # print(player.history.reshape(1,-1).flatten())
-
-            print(rewards[list(zip([1,0],[0,1]))])
-            print(rewards[(1,1)])
-            return
-            
-            
-
-
+            rewards = self.game.payoff_matrix[player.history[:,-1].reshape(n,),
+                                              opponent_actions]
+            p_rewards = np.sum(rewards[:,0])
+            player.rewards += p_rewards
+            opponent_rewards = rewards[:,1]
+            for i, id in enumerate(opponent_ids):
+                opponent = self.players[id]
+                opponent.rewards += opponent_rewards[i]
 
     def create_players(self, n_players:int)-> list[Player]:
         

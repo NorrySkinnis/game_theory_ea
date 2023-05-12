@@ -13,7 +13,7 @@ class Player:
         self.identifier = identifier
         self.brain = MLP(n_input=memory_capacity, n_hidden=4)
         self.history = None
-        self.rewards = []
+        self.rewards = 0
         self.opponents = []
         
     def act(self, history: list) -> np.ndarray[int]: 

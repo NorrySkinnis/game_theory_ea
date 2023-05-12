@@ -10,10 +10,10 @@ from environment import Environment as env
 
 if __name__=='__main__':
     n_games = 100
-    n_matchups = 13
+    n_matchups = 50
     n_generations = 10
 
-    env = env(n_players=2)
+    env = env(n_players=10)
     players = env.run(n_games=n_games, 
                       n_matchups=n_matchups, 
                       n_generations=n_generations)
