@@ -4,7 +4,7 @@ class Player:
 
     """Creates player with a unique identifier and a reasoning mechanism."""
     
-    def __init__(self, identifier:int, memory_capacity:int):
+    def __init__(self, identifier:int, memory_capacity=3):
 
         """ parameters:
             identifier: unique identifier for player

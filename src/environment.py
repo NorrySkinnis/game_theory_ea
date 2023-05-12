@@ -55,23 +55,41 @@ class Environment:
 
     """ Creates an environment for players to interact in."""
 
-    def __init__(self, players:list[player], game=PrisonersDilemma(), fitness=lambda x: np.sum(x)):
+    def __init__(self, n_players=1000, game=PrisonersDilemma(), fitness=lambda x: np.sum(x)):
 
         """ parameters:
             players: list of players
-
-        """   
-        self.players = players
+            game: game to simulate
+            fitness: fitness function for players
+            """
+           
+        self.players = self.create_players(n_players)
         self.game = game
         self.fitness = fitness 
+
+    def run(self, n_games:int, n_matchups:int, n_generations:int)->list[player]:
+
+        """ parameters:
+            n_games: number of games to simulate
+            n_matchups: number of opponents to sample
+            n_generations: number of generations to simulate
+
+            returns:
+            players: list of surving players after n_generations
+            """
+        
+        for g in range(n_generations):
+            for p in self.players:
+                opponents = self.sample_opponents(p, n_matchups)
+                self.game.simulate(p, opponents, n_games)
+            self.evolve()
     
-    def evolve(self, n_games, n_matchups, n_generations):     
-        for p in self.players:
-            opponents = self.sample_opponents(p, n_matchups)
-            self.game.simulate(p, opponents, n_games)
+    def evolve(self)->None:
+        # TODO: implement evolution algorithm
         pass
-    
+        
     def sample_opponents(self, player:player, n_matchups:int)-> list[player]:
+
         """ parameters:
             player: player to sample opponents for
             n_matchups: number of opponents to sample
@@ -79,6 +97,7 @@ class Environment:
             returns:
             opponents: list of opponents
             """
+        
         opponents = []
         n_matchups_played = len(player.get_opponents())
         n_matchups_remain = n_matchups - n_matchups_played
@@ -88,6 +107,20 @@ class Environment:
                 continue
             opponents.append(self.players[opponent_id])
         return opponents
+
+    def create_players(self, n_players:int)-> list[player]:
+        
+        """ parameters:
+            n_players: number of players to create
+
+            returns:
+            players: list of players
+            """
+        
+        players = []
+        for i in range(n_players):
+            players.append(player(i, self.fitness))
+        return players
 
 
 
