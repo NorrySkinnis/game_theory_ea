@@ -13,7 +13,7 @@ class Player:
         self.identifier = identifier
         self.brain = MLP(n_input=memory_capacity, n_hidden=4)
         self.history = None
-        self.rewards = None
+        self.rewards = []
         self.opponents = []
         
     def act(self, history: list) -> np.ndarray[int]: 
@@ -66,15 +66,12 @@ class MLP:
         X = np.array(X)
         if len(X.shape) == 1: 
             X = np.reshape(X, (1, X.shape[0]))
-    
         n = X.shape[1]
         m = self.W1.shape[0]
-        
         if n < m:
             X = np.hstack((np.random.randint(2, size=(X.shape[0], m-n)), X))
         else:
             X = X[:,-m:]
-        
         output = self.f1(X @ self.W1 + self.Wb1) @ self.W2 + self.Wb2
         output = np.array(output >= 0, dtype=bool) * 1
         output = np.reshape(output, (output.shape[0],))

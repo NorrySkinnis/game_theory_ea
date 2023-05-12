@@ -5,7 +5,7 @@ class PrisonersDilemma:
 
     """ Creates a Prisoner's Dilemma game."""
 
-    def __init__(self, payoff_matrix=[[(3,3), (0,5)], [(5,0), (1,1)]], actions=['C', 'D']):
+    def __init__(self, payoff_matrix=np.array([[(3,3), (0,5)], [(5,0), (1,1)]]), actions=['C', 'D']):
 
         """ parameters:
             payoff_matrix: 2x2 matrix of tuples, where each tuple is the payoff for each player
@@ -59,7 +59,7 @@ class Environment:
             for p in self.players:
                 opponent_ids = self.sample_opponents(p, n_matchups)
                 self.simulate_game(p, opponent_ids, n_games)
-                break
+                return
             self.evolve()
     
     def evolve(self)->None:
@@ -82,6 +82,8 @@ class Environment:
             opponent_id = np.random.randint(len(self.players))
             if opponent_id == player.identifier:
                 continue
+            elif self.players[opponent_id].opponents == n_matchups:
+                continue
             opponent_ids.append(opponent_id)
         return opponent_ids
     
@@ -96,19 +98,29 @@ class Environment:
             None
             """
         n = len(opponent_ids)
-        opponent_histories = [[]]*n
-        player.history = [[]]*n
-        for _ in range(n_games):
+        opponent_histories = [[] for _ in range(n)]  
+        player.history = [[] for _ in range(n)] 
+        for game_i in range(n_games):
             for i, id in enumerate(opponent_ids): 
                 opponent = self.players[id]
-                break
                 o_action = opponent.act(player.history[i])
                 opponent_histories[i].append(o_action[0])
+            p_actions = player.act(opponent_histories).reshape(-1,1)
+            if game_i == 0:
+                player.history = p_actions
+            else:
+                player.history = np.hstack((player.history, p_actions))
+            rewards = self.game.payoff_matrix[(1,1), (1,1)]
+            # print(np.ravel(opponent_histories))
+            # print(player.history.reshape(1,-1).flatten())
 
-            p_actions = player.act(opponent_histories)
-            player.history = np.vstack((player.history, p_actions))
-            print(player.history.shape) 
-            break      
+            print(rewards[list(zip([1,0],[0,1]))])
+            print(rewards[(1,1)])
+            return
+            
+            
+
+
 
     def create_players(self, n_players:int)-> list[Player]:
         
