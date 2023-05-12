@@ -1,5 +1,5 @@
 import numpy as np
-from player import Player as player
+from player import Player
 
 class PrisonersDilemma:
 
@@ -14,25 +14,27 @@ class PrisonersDilemma:
         self.payoff_matrix = payoff_matrix
         self.actions = actions
         
-    def simulate(self, player:player, opponents:list[int], n_games:int) -> None: 
-        """
-        parameters:
-        player: player to simulate games for
-        opponents: list of possible opponents
-        n_games: number of games to play
-        
-        returns: None
-        """ 
+    def simulate(self, player:Player, opponents:list[Player], n_games:int) -> None: 
 
+        """ parameters:
+            player: player to simulate
+            opponents: list of opponents
+            n_games: number of games to simulate
+
+            returns:
+            None
+            """
         o_histories = []
         o_actions = []
-        for game_i in range(n_games):
+        for _ in range(n_games):
             for i, opponent in enumerate(opponents):    
-                o_histories.append(opponent.history[0]) 
-                o_action = opponent.act(player.history[i])
+                o_histories.append(opponent.history) 
+                o_action = opponent.act(player.history)
                 opponent.history.append(o_action)
                 o_actions.append(o_action)
-            p_actions = player.act(o_histories)
+            print(o_histories)
+            print(o_actions)
+            #p_actions = player.act(o_histories)
             # cannot slice list, have to find better way to append player history 
             
             
@@ -44,7 +46,6 @@ class PrisonersDilemma:
             returns:
             history: list of actions taken by player, where each action is a string
             """ 
-        
         history = p_history.copy()
         for i, a in enumerate(history):          
             history[i] = self.actions[history[i]]        
@@ -61,13 +62,12 @@ class Environment:
             players: list of players
             game: game to simulate
             fitness: fitness function for players
-            """
-           
+            """ 
         self.players = self.create_players(n_players)
         self.game = game
         self.fitness = fitness 
 
-    def run(self, n_games:int, n_matchups:int, n_generations:int)->list[player]:
+    def run(self, n_games:int, n_matchups:int, n_generations:int)->list[Player]:
 
         """ parameters:
             n_games: number of games to simulate
@@ -77,18 +77,18 @@ class Environment:
             returns:
             players: list of surving players after n_generations
             """
-        
         for g in range(n_generations):
             for p in self.players:
                 opponents = self.sample_opponents(p, n_matchups)
                 self.game.simulate(p, opponents, n_games)
+                break
             self.evolve()
     
     def evolve(self)->None:
         # TODO: implement evolution algorithm
         pass
         
-    def sample_opponents(self, player:player, n_matchups:int)-> list[player]:
+    def sample_opponents(self, player:Player, n_matchups:int)-> list[Player]:
 
         """ parameters:
             player: player to sample opponents for
@@ -97,18 +97,17 @@ class Environment:
             returns:
             opponents: list of opponents
             """
-        
         opponents = []
-        n_matchups_played = len(player.get_opponents())
+        n_matchups_played = len(player.opponents)
         n_matchups_remain = n_matchups - n_matchups_played
         while len(opponents) < n_matchups_remain:
             opponent_id = np.random.randint(len(self.players))
-            if opponent_id == player.get_id():
+            if opponent_id == player.identifier:
                 continue
             opponents.append(self.players[opponent_id])
         return opponents
 
-    def create_players(self, n_players:int)-> list[player]:
+    def create_players(self, n_players:int)-> list[Player]:
         
         """ parameters:
             n_players: number of players to create
@@ -116,10 +115,9 @@ class Environment:
             returns:
             players: list of players
             """
-        
         players = []
         for i in range(n_players):
-            players.append(player(i, self.fitness))
+            players.append(Player(i))
         return players
 
 

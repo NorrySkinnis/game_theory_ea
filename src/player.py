@@ -10,7 +10,6 @@ class Player:
             identifier: unique identifier for player
             memory_capacity: number of previous actions to consider when making a decision
             """
-
         self.identifier = identifier
         self.brain = MLP(n_input=memory_capacity, n_hidden=4)
         self.history = []
@@ -24,8 +23,7 @@ class Player:
             
             returns:
             action: 0 or 1, corresponding to cooperate or defect
-            """  
-              
+            """       
         action = self.brain.forward(history)
         return action
     
@@ -50,7 +48,6 @@ class MLP:
             returns:
             None 
             """
-        
         self.W1 = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
         self.W2 = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
         self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
