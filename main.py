@@ -12,9 +12,9 @@ if __name__=='__main__':
 
     n_games = 1
     n_matchups = 10
-    n_generations = 10
+    n_generations = 1
 
-    env = env()
+    env = env(n_players=10)
     players = env.run(n_games=n_games, 
                       n_matchups=n_matchups, 
                       n_generations=n_generations)

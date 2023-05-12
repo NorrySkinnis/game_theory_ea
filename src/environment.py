@@ -13,31 +13,7 @@ class PrisonersDilemma:
             """
         self.payoff_matrix = payoff_matrix
         self.actions = actions
-        
-    def simulate(self, player:Player, opponents:list[Player], n_games:int) -> None: 
-
-        """ parameters:
-            player: player to simulate
-            opponents: list of opponents
-            n_games: number of games to simulate
-
-            returns:
-            None
-            """
-        o_histories = []
-        o_actions = []
-        for _ in range(n_games):
-            for i, opponent in enumerate(opponents):    
-                o_histories.append(opponent.history) 
-                o_action = opponent.act(player.history)
-                opponent.history.append(o_action)
-                o_actions.append(o_action)
-            print(o_histories)
-            print(o_actions)
-            #p_actions = player.act(o_histories)
-            # cannot slice list, have to find better way to append player history 
-            
-            
+              
     def to_action(self, p_history=list[int])-> list[str]:
 
         """ parameters:
@@ -60,10 +36,12 @@ class Environment:
 
         """ parameters:
             players: list of players
+            player_histories: list of player histories
             game: game to simulate
             fitness: fitness function for players
             """ 
         self.players = self.create_players(n_players)
+        self.player_histories = [p.history for p in self.players]
         self.game = game
         self.fitness = fitness 
 
@@ -79,8 +57,8 @@ class Environment:
             """
         for g in range(n_generations):
             for p in self.players:
-                opponents = self.sample_opponents(p, n_matchups)
-                self.game.simulate(p, opponents, n_games)
+                opponent_ids = self.sample_opponents(p, n_matchups)
+                self.simulate_game(p, opponent_ids, n_games)
                 break
             self.evolve()
     
@@ -95,17 +73,42 @@ class Environment:
             n_matchups: number of opponents to sample
 
             returns:
-            opponents: list of opponents
+            opponents: list of opponent ids
             """
-        opponents = []
+        opponent_ids = []
         n_matchups_played = len(player.opponents)
         n_matchups_remain = n_matchups - n_matchups_played
-        while len(opponents) < n_matchups_remain:
+        while len(opponent_ids) < n_matchups_remain:
             opponent_id = np.random.randint(len(self.players))
             if opponent_id == player.identifier:
                 continue
-            opponents.append(self.players[opponent_id])
-        return opponents
+            opponent_ids.append(opponent_id)
+        return opponent_ids
+    
+    def simulate_game(self, player:Player, opponent_ids:list[int], n_games:int) -> None: 
+
+        """ parameters:
+            player: player to simulate
+            opponents: list of opponent ids
+            n_games: number of games to simulate
+
+            returns:
+            None
+            """
+        n = len(opponent_ids)
+        opponent_histories = [[]]*n
+        player.history = [[]]*n
+        for _ in range(n_games):
+            for i, id in enumerate(opponent_ids): 
+                opponent = self.players[id]
+                break
+                o_action = opponent.act(player.history[i])
+                opponent_histories[i].append(o_action[0])
+
+            p_actions = player.act(opponent_histories)
+            player.history = np.vstack((player.history, p_actions))
+            print(player.history.shape) 
+            break      
 
     def create_players(self, n_players:int)-> list[Player]:
         

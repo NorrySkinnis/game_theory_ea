@@ -12,20 +12,20 @@ class Player:
             """
         self.identifier = identifier
         self.brain = MLP(n_input=memory_capacity, n_hidden=4)
-        self.history = []
-        self.rewards = []
+        self.history = None
+        self.rewards = None
         self.opponents = []
         
-    def act(self, history: list) -> int: 
+    def act(self, history: list) -> np.ndarray[int]: 
 
         """ parameters: 
             history: list of observed actions
             
             returns:
-            action: 0 or 1, corresponding to cooperate or defect
+            actions: array of 0s and 1s, corresponding to cooperate or defect
             """       
-        action = self.brain.forward(history)
-        return action
+        actions = self.brain.forward(history)
+        return actions
     
 class MLP:
 
@@ -57,10 +57,11 @@ class MLP:
     def forward(self, X: list)-> np.ndarray:
          
         """ parameters:
-            X: input matrix of shape (n, m), where n is the number of observations and m is the number of actions observed by player
+            X: input matrix of shape (n, m), where n is the number of opponents 
+               and m is the number of actions observed 
 
             returns:
-            output: output matrix of shape (n, 1), one action for each observation
+            output: output matrix of shape (n, 1), one action for each opponent
             """ 
         X = np.array(X)
         if len(X.shape) == 1: 
@@ -75,6 +76,7 @@ class MLP:
             X = X[:,-m:]
         
         output = self.f1(X @ self.W1 + self.Wb1) @ self.W2 + self.Wb2
-        output = np.array(output >= 0, dtype=bool).reshape(output.shape[0],) * 1
+        output = np.array(output >= 0, dtype=bool) * 1
+        output = np.reshape(output, (output.shape[0],))
         return output
           
