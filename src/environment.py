@@ -45,7 +45,7 @@ class Environment:
         self.game = game
         self.fitness = fitness 
 
-    def run(self, n_games:int, n_matchups:int, n_generations:int)->list[Player]:
+    def run(self, n_games:int, n_matchups:int, n_generations:int)->None:
 
         """ parameters:
             n_games: number of games to simulate
@@ -66,7 +66,8 @@ class Environment:
             # end_time = time.time()
             # execution_time = end_time - start_time
             # print("Execution time:", execution_time, "seconds")
-            self.evolve()
+            self.players = self.evolve()
+
     
     def evolve(self)->None:
         # TODO: implement evolution algorithm
