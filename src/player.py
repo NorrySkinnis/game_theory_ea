@@ -1,4 +1,8 @@
 import numpy as np
+import torch
+import torch.nn as nn
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Player:
 
@@ -24,10 +28,10 @@ class Player:
             returns:
             actions: array of 0s and 1s, corresponding to cooperate or defect
             """       
-        actions = self.brain.forward(history)
+        actions = self.brain(history)
         return actions
     
-class MLP:
+class MLP(nn.Module):
 
     """Creates a multi-layer perceptron with a single hidden layer."""
 
@@ -47,12 +51,16 @@ class MLP:
 
             returns:
             None 
-            """
-        self.W1 = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
-        self.W2 = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
-        self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
-        self.Wb2 = np.random.normal(loc=0, scale=2, size=(1, 1))
-        self.f1 = activation
+        """
+        super(MLP, self).__init__()
+        # self.W1 = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
+        self.W1 = nn.Linear(n_input, n_hidden, bias=True)
+        # self.W2 = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
+        self.W2 = nn.Linear(n_hidden, 1, bias=True)
+        # self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
+        # self.Wb2 = np.random.normal(loc=0, scale=2, size=(1, 1))
+        # self.f1 = activation
+        self.relu = nn.ReLU()
     
     def forward(self, X: list)-> np.ndarray:
          
@@ -63,17 +71,24 @@ class MLP:
             returns:
             output: output matrix of shape (n, 1), one action for each opponent
             """ 
-        X = np.array(X)
-        if len(X.shape) == 1: 
-            X = np.reshape(X, (1, X.shape[0]))
-        n = X.shape[1]
-        m = self.W1.shape[0]
-        if n < m:
-            X = np.hstack((np.random.randint(2, size=(X.shape[0], m-n)), X))
-        else:
-            X = X[:,-m:]
-        output = self.f1(X @ self.W1 + self.Wb1) @ self.W2 + self.Wb2
-        output = np.array(output >= 0, dtype=bool) * 1
-        output = np.reshape(output, (output.shape[0],))
-        return output
+        # X = np.array(X)
+        # if len(X.shape) == 1:
+        #     X = np.reshape(X, (1, X.shape[0]))
+        # n = X.shape[1]
+        # m = self.W1.shape[0]
+        # if n < m:
+        #     X = np.hstack((np.random.randint(2, size=(X.shape[0], m-n)), X))
+        # else:
+        #     X = X[:,-m:]
+        # output = self.f1(X @ self.W1 + self.Wb1) @ self.W2 + self.Wb2
+        # output = np.array(output >= 0, dtype=bool) * 1
+        # output = np.reshape(output, (output.shape[0],))
+        # return output
+        X = torch.tensor(X, dtype=torch.float32, device=device)
+        Y = self.W1(X)
+        Y = self.relu(self.W2(Y))
+        out = Y.detach().numpy()
+        out = np.array(out >= 0, dtype=np.float32).reshape(out.shape[0],)
+        return out
+
           
