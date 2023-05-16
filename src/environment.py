@@ -112,7 +112,7 @@ class Environment:
         n = len(opponent_ids)
         opponent_histories = [[] for _ in range(n)]  
         player.history = [[] for _ in range(n)] 
-        for game_i in range(n_games):
+        for game_i in tqdm(range(n_games), desc="Games"):
             opponent_actions = []
             for i, id in enumerate(opponent_ids): 
                 opponent = self.players[id]
