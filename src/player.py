@@ -4,12 +4,11 @@ import torch.nn as nn
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-class Player:
 
+class Player:
     """Creates player with a unique identifier and a reasoning mechanism."""
     
     def __init__(self, identifier:int, memory_capacity=3):
-
         """ parameters:
             identifier: unique identifier for player
             memory_capacity: number of previous actions to consider when making a decision
@@ -21,8 +20,7 @@ class Player:
         self.opponents = []
         
     def act(self, history: list) -> np.ndarray[int]: 
-
-        """ parameters: 
+        """ parameters:
             history: list of observed actions
             
             returns:
@@ -30,13 +28,13 @@ class Player:
             """       
         actions = self.brain(history)
         return actions
-    
+
+
 class MLP(nn.Module):
 
     """Creates a multi-layer perceptron with a single hidden layer."""
 
     def __init__(self, n_input, n_hidden, bias=True):
-
         """ parameters:
             n_input: number of actions observed by player
             n_hidden: number of hidden units in the hidden layer 
@@ -54,17 +52,17 @@ class MLP(nn.Module):
         """
         super(MLP, self).__init__()
         self.n_input = n_input
-        # self.W1 = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
         self.W1 = nn.Linear(n_input, n_hidden, bias=bias)
-        # self.W2 = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
         self.W2 = nn.Linear(n_hidden, 1, bias=bias)
-        # self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
-        # self.Wb2 = np.random.normal(loc=0, scale=2, size=(1, 1))
-        # self.f1 = activation
         self.relu = nn.ReLU()
+
+        self.W1 = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
+        self.W2 = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
+        self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
+        self.Wb2 = np.random.normal(loc=0, scale=2, size=(1, 1))
+        self.f1 = lambda x: np.maximum(0, x)
     
     def forward(self, X: list)-> np.ndarray:
-         
         """ parameters:
             X: input matrix of shape (n, m), where n is the number of opponents 
                and m is the number of actions observed 
@@ -72,19 +70,6 @@ class MLP(nn.Module):
             returns:
             output: output matrix of shape (n, 1), one action for each opponent
             """ 
-        # X = np.array(X)
-        # if len(X.shape) == 1:
-        #     X = np.reshape(X, (1, X.shape[0]))
-        # n = X.shape[1]
-        # m = self.W1.shape[0]
-        # if n < m:
-        #     X = np.hstack((np.random.randint(2, size=(X.shape[0], m-n)), X))
-        # else:
-        #     X = X[:,-m:]
-        # output = self.f1(X @ self.W1 + self.Wb1) @ self.W2 + self.Wb2
-        # output = np.array(output >= 0, dtype=bool) * 1
-        # output = np.reshape(output, (output.shape[0],))
-        # return output
         X = np.array(X)
         if len(X.shape) == 1:
             X = np.reshape(X, (1, X.shape[0]))
@@ -99,5 +84,21 @@ class MLP(nn.Module):
         out = Y.detach().cpu().numpy()
         out = np.array(out >= 0, dtype=np.int32).reshape(out.shape[0],)
         return out
+
+    def forward_non_cuda(self, X: list)-> np.ndarray:
+        """Forward pass not using cuda"""
+        X = np.array(X)
+        if len(X.shape) == 1:
+            X = np.reshape(X, (1, X.shape[0]))
+        n = X.shape[1]
+        m = self.W1.shape[0]
+        if n < m:
+            X = np.hstack((np.random.randint(2, size=(X.shape[0], m-n)), X))
+        else:
+            X = X[:,-m:]
+        output = self.f1(X @ self.W1 + self.Wb1) @ self.W2 + self.Wb2
+        output = np.array(output >= 0, dtype=bool) * 1
+        output = np.reshape(output, (output.shape[0],))
+        return output
 
           
