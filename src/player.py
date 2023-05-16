@@ -15,7 +15,7 @@ class Player:
             memory_capacity: number of previous actions to consider when making a decision
             """
         self.identifier = identifier
-        self.brain = MLP(n_input=memory_capacity, n_hidden=4)
+        self.brain = MLP(n_input=memory_capacity, n_hidden=4).to(device)
         self.history = None
         self.rewards = 0
         self.opponents = []
@@ -35,7 +35,7 @@ class MLP(nn.Module):
 
     """Creates a multi-layer perceptron with a single hidden layer."""
 
-    def __init__(self, n_input, n_hidden, activation=lambda x: np.maximum(0,x)): 
+    def __init__(self, n_input, n_hidden, bias=True):
 
         """ parameters:
             n_input: number of actions observed by player
@@ -53,10 +53,11 @@ class MLP(nn.Module):
             None 
         """
         super(MLP, self).__init__()
+        self.n_input = n_input
         # self.W1 = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
-        self.W1 = nn.Linear(n_input, n_hidden, bias=True)
+        self.W1 = nn.Linear(n_input, n_hidden, bias=bias)
         # self.W2 = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
-        self.W2 = nn.Linear(n_hidden, 1, bias=True)
+        self.W2 = nn.Linear(n_hidden, 1, bias=bias)
         # self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
         # self.Wb2 = np.random.normal(loc=0, scale=2, size=(1, 1))
         # self.f1 = activation
@@ -84,11 +85,19 @@ class MLP(nn.Module):
         # output = np.array(output >= 0, dtype=bool) * 1
         # output = np.reshape(output, (output.shape[0],))
         # return output
-        X = torch.tensor(X, dtype=torch.float32, device=device)
+        X = np.array(X)
+        if len(X.shape) == 1:
+            X = np.reshape(X, (1, X.shape[0]))
+        n = X.shape[1]
+        if n < self.n_input:
+            X = np.hstack((np.random.randint(2, size=(X.shape[0], self.n_input-n)), X))
+        else:
+            X = X[:, -self.n_input:]
+        X = torch.from_numpy(X).float().to(device)
         Y = self.W1(X)
         Y = self.relu(self.W2(Y))
-        out = Y.detach().numpy()
-        out = np.array(out >= 0, dtype=np.float32).reshape(out.shape[0],)
+        out = Y.detach().cpu().numpy()
+        out = np.array(out >= 0, dtype=np.int32).reshape(out.shape[0],)
         return out
 
           
