@@ -16,7 +16,7 @@ class Player:
         self.reward_history = []
         self.opponents = []
         
-    def act(self, history: list) -> np.ndarray[int]: 
+    def act(self, history: list) -> np.ndarray: 
 
         """ parameters: 
             history: list of observed actions
@@ -26,6 +26,18 @@ class Player:
             """       
         actions = self.brain.forward(history)
         return actions
+    
+    def __lt__(self, other):
+        """Helper function to sort players by reward history
+
+        Args:
+            other (Player): Player to compare total reward to
+
+        Returns:
+            Bool: True if greater, False if smaller
+        """
+        # This won't work until reward history is fixed
+        return sum(self.reward_history) > sum(other.reward_history)
     
 class MLP:
 

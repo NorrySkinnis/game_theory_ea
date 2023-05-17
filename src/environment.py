@@ -1,6 +1,8 @@
 import numpy as np
 from player import Player
 import time
+import random
+import copy
 
 class PrisonersDilemma:
 
@@ -70,9 +72,27 @@ class Environment:
     
     def evolve(self)->None:
         # TODO: implement evolution algorithm
+        # this won't work until reward history is fixed
+        players = self.players.sort()
+        newplayers = []
+        # Add best half of parents to next generation(elitism), generate and mutate offspring by adding noise
+        # This is probably full of bugs but I can't test it yet
+        for i in range(len(players)/2):
+            newplayers.append(players[i])
+            child = copy.deepcopy(players[i])
+            for w in child.brain.W1:
+                w += random.uniform(-1, 1)
+            for w in child.brain.W2:
+                w += random.uniform(-1, 1)
+            for w in child.brain.Wb1:
+                w += random.uniform(-1, 1)
+            for w in child.brain.Wb2:
+                w += random.uniform(-1, 1)
+            newplayers.append(child)
         # TODO: reset player rewards
+        # idem
         # TODO: vectorize computations
-        pass
+        # unsure
         
     def sample_opponents(self, player:Player, n_matchups:int)-> list[Player]:
 
@@ -124,7 +144,7 @@ class Environment:
                 player.history = np.hstack((player.history, p_actions))
             rewards = self.game.payoff_matrix[player.history[:,-1].reshape(n,),
                                               opponent_actions]
-            player.reward_history.append(rewards[:,0])
+            player.reward_history.append(rewards[:,0])    
             for i, id in enumerate(opponent_ids):
                 opponent = self.players[id]
                 if player.identifier == id:
