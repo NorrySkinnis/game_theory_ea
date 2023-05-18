@@ -62,7 +62,7 @@ class Environment:
                 if len(opponent_ids) == 0:
                     continue              
                 self.simulate_game(p, opponent_ids, n_games)
-
+            return
             # end_time = time.time()
             # execution_time = end_time - start_time
             # print("Execution time:", execution_time, "seconds")
@@ -126,12 +126,12 @@ class Environment:
                 player.history = np.hstack((player.history, p_actions))
             rewards = self.game.payoff_matrix[player.history[:,-1].reshape(n,),
                                               opponent_actions]
-            player.reward_history.append(rewards[:,0])
+            player.reward_history += rewards[:,0].tolist()
             for i, id in enumerate(opponent_ids):
                 opponent = self.players[id]
                 if player.identifier == id:
                     continue
-                opponent.reward_history.append(rewards[i,1])
+                opponent.reward_history += [rewards[i,1]]
 
     # Same functionality, twice as slow
     # def simulate_game_2(self, player:Player, opponent_ids:list[int], n_games:int) -> None:
