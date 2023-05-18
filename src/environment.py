@@ -90,6 +90,8 @@ class Environment:
             opponent_id = np.random.randint(len(self.players))
             if len(self.players[opponent_id].opponents) == n_matchups:
                 continue
+            elif len(self.players[opponent_id].opponents) == n_matchups:
+                continue
             opponent_ids.append(opponent_id)
             self.players[opponent_id].opponents.append(player.identifier)
             if opponent_id == player.identifier:
@@ -117,7 +119,7 @@ class Environment:
                 o_action = opponent.act(player.history[i])
                 opponent_actions.append(o_action[0])
                 opponent_histories[i].append(o_action[0])
-            p_actions = player.act(opponent_histories).reshape(-1,1)
+            p_actions = player.act(opponent_histories).reshape(-1, 1)
             if game_i == 0:
                 player.history = p_actions
             else:
