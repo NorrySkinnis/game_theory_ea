@@ -1,7 +1,6 @@
 import numpy as np
 from player import Player
 import time
-from tqdm import tqdm
 
 class PrisonersDilemma:
 
@@ -56,7 +55,7 @@ class Environment:
             returns:
             players: list of surving players after n_generations
             """
-        for _ in tqdm(range(n_generations), desc="Generations"):
+        for _ in range(n_generations):
             #start_time = time.time()
             for p in self.players:
                 opponent_ids = self.sample_opponents(p, n_matchups)
@@ -112,7 +111,7 @@ class Environment:
         n = len(opponent_ids)
         opponent_histories = [[] for _ in range(n)]  
         player.history = [[] for _ in range(n)] 
-        for game_i in tqdm(range(n_games), desc="Games"):
+        for game_i in range(n_games):
             opponent_actions = []
             for i, id in enumerate(opponent_ids): 
                 opponent = self.players[id]

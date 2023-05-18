@@ -56,12 +56,12 @@ class MLP(nn.Module):
         self.W2 = nn.Linear(n_hidden, 1, bias=bias)
         self.relu = nn.ReLU()
 
-        self.W1 = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
-        self.W2 = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
+        self.W1_ = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
+        self.W2_ = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
         self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
         self.Wb2 = np.random.normal(loc=0, scale=2, size=(1, 1))
         self.f1 = lambda x: np.maximum(0, x)
-    
+
     def forward(self, X: list)-> np.ndarray:
         """ parameters:
             X: input matrix of shape (n, m), where n is the number of opponents 
@@ -96,7 +96,7 @@ class MLP(nn.Module):
             X = np.hstack((np.random.randint(2, size=(X.shape[0], m-n)), X))
         else:
             X = X[:,-m:]
-        output = self.f1(X @ self.W1 + self.Wb1) @ self.W2 + self.Wb2
+        output = self.f1(X @ self.W1_ + self.Wb1) @ self.W2_ + self.Wb2
         output = np.array(output >= 0, dtype=bool) * 1
         output = np.reshape(output, (output.shape[0],))
         return output
