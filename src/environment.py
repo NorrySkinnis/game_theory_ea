@@ -56,18 +56,17 @@ class Environment:
             players: list of surving players after n_generations
             """
         for _ in range(n_generations):
-            #start_time = time.time()
+            # start_time = time.time()
             for p in self.players:
                 opponent_ids = self.sample_opponents(p, n_matchups)
                 if len(opponent_ids) == 0:
-                    continue
+                    continue              
                 self.simulate_game(p, opponent_ids, n_games)
-                # self.simulate_game_2(p, opponent_ids, n_games)
+
             # end_time = time.time()
             # execution_time = end_time - start_time
             # print("Execution time:", execution_time, "seconds")
-            self.players = self.evolve()
-
+            self.evolve()
     
     def evolve(self)->None:
         # TODO: implement evolution algorithm
@@ -85,16 +84,18 @@ class Environment:
             opponents: list of opponent ids
             """
         opponent_ids = []
-        n_matchups_played = len(player.opponents)
+        n_matchups_played = len(player.opponents) 
         n_matchups_remain = n_matchups - n_matchups_played
         while len(opponent_ids) < n_matchups_remain:
             opponent_id = np.random.randint(len(self.players))
-            if opponent_id == player.identifier:
+            if len(self.players[opponent_id].opponents) == n_matchups:
                 continue
             elif len(self.players[opponent_id].opponents) == n_matchups:
                 continue
             opponent_ids.append(opponent_id)
             self.players[opponent_id].opponents.append(player.identifier)
+            if opponent_id == player.identifier:
+                continue
             player.opponents.append(opponent_id)
         return opponent_ids
     
@@ -125,12 +126,12 @@ class Environment:
                 player.history = np.hstack((player.history, p_actions))
             rewards = self.game.payoff_matrix[player.history[:,-1].reshape(n,),
                                               opponent_actions]
-            p_rewards = np.sum(rewards[:,0])
-            player.rewards += p_rewards
-            opponent_rewards = rewards[:,1]
+            player.reward_history.append(rewards[:,0])
             for i, id in enumerate(opponent_ids):
                 opponent = self.players[id]
-                opponent.rewards += opponent_rewards[i]
+                if player.identifier == id:
+                    continue
+                opponent.reward_history.append(rewards[i,1])
 
     # Same functionality, twice as slow
     # def simulate_game_2(self, player:Player, opponent_ids:list[int], n_games:int) -> None:
