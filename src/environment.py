@@ -131,7 +131,7 @@ class Environment:
                 opponent = self.players[id]
                 if player.identifier == id:
                     continue
-                opponent.reward_history += [rewards[i,1]]
+                opponent.reward_history.append(rewards[i,1])
 
     # Same functionality, twice as slow
     # def simulate_game_2(self, player:Player, opponent_ids:list[int], n_games:int) -> None:
