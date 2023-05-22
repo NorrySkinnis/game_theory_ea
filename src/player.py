@@ -5,18 +5,21 @@ import torch.nn as nn
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Player:
-    """Creates player with a unique identifier and a reasoning mechanism."""
-    max_memory_capacity = 3
-    def __init__(self, identifier:int, n_matchups:int, n_games:int, memory_capacity=3):
-        """ parameters:
+
+    # Has to be bigger than memory capacity
+    max_memory_capacity = 1
+    def __init__(self, identifier:int, n_matchups:int, n_games:int, memory_capacity=1):
+        """ Args:
             identifier: unique identifier for player
+            n_matchups: number of matchups per generation
+            n_games: number of games per matchup
             memory_capacity: number of previous actions to consider when making a decision
             """ 
         self.identifier = identifier
         self.memory_capacity = memory_capacity
         self.brain = MLP(n_input=memory_capacity, n_hidden=4).to(device)
-        self.action_history = np.empty(shape=(n_matchups, n_games+Player.max_memory_capacity), dtype=int)
-        self.reward_history = np.empty(shape=n_games, dtype=int)
+        self.action_history = -np.ones(shape=(n_matchups, n_games + Player.max_memory_capacity), dtype=int)
+        self.reward_history = -np.ones(shape=(n_matchups, n_games), dtype=int)
         self.matchups_played = 0
         self.initialize_action_history()
     
@@ -26,10 +29,10 @@ class Player:
         self.action_history[:,:Player.max_memory_capacity] = random_actions
         
     def act(self, history: np.ndarray) -> np.ndarray: 
-        """ parameters:
-            history: list of observed actions
+        """ Args:
+            history: array of observed actions
             
-            returns:
+            Returns:
             actions: array of 0s and 1s, corresponding to cooperate or defect
             """       
         actions = self.brain.forward_non_cuda(history)
@@ -37,25 +40,13 @@ class Player:
 
 
 class MLP(nn.Module):
-
     """Creates a multi-layer perceptron with a single hidden layer."""
-
     def __init__(self, n_input, n_hidden, bias=True):
-        """ parameters:
+        """ Args:
             n_input: number of actions observed by player
             n_hidden: number of hidden units in the hidden layer 
             activation: activation function for hidden layer (default: ReLU)
-
-            attributes:
-            W1: weight matrix for input to hidden layer
-            W2: weight matrix for hidden layer to output
-            Wb1: bias matrix for input to hidden layer
-            Wb2: bias matrix for hidden layer to output
-            f1: activation function for hidden layer
-
-            returns:
-            None 
-        """
+            """
         super(MLP, self).__init__()
         self.n_input = n_input
         self.W1 = nn.Linear(n_input, n_hidden, bias=bias)
@@ -69,25 +60,17 @@ class MLP(nn.Module):
         self.f1 = lambda x: np.maximum(0, x)
 
     def forward(self, X: np.ndarray)-> np.ndarray:
-        """ parameters:
+        """ Args:
             X: input matrix of shape (n, m), where n is the number of opponents 
                and m is the number of actions observed 
 
-            returns:
+            Returns:
             output: output matrix of shape (n, 1), one action for each opponent
             """ 
-        X = np.array(X)
-        if len(X.shape) == 1:
-            X = np.reshape(X, (1, X.shape[0]))
-        n = X.shape[1]
-        if n < self.n_input:
-            X = np.hstack((np.random.randint(2, size=(X.shape[0], self.n_input-n)), X))
-        else:
-            X = X[:, -self.n_input:]
-        X = torch.from_numpy(X).float().to(device)
-        Y = self.W1(X)
-        Y = self.relu(self.W2(Y))
-        out = Y.detach().cpu().numpy()
+        X = torch.tensor(X, dtype=torch.float32).to(device)
+        y = self.W1(X)
+        y = self.relu(self.W2(y))
+        out = y.detach().cpu().numpy()
         out = np.array(out >= 0, dtype=np.int32).reshape(out.shape[0],)
         return out
 

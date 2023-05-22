@@ -109,7 +109,7 @@ class Environment:
                 opponent_actions[i,:] = opponent.action_history[nth_matchup,:]
                 # Increment number of matchups for current opponent 
                 opponent.matchups_played += 1
-            # Determine player actions based on all opponents' actions
+            # Determine player actions based on slice of all opponents' actions
             upper = max_memory_capacity + game_i
             lower = upper - player.memory_capacity         
             player_actions = player.act(opponent_actions[:,lower:upper])
