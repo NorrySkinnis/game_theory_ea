@@ -76,7 +76,7 @@ class Environment:
         # Number of matchups played by player so far
         nth_player_matchup = player.matchups_played
         # Create container for opponent actions
-        opponent_actions = np.empty(shape=(n, self.n_games + max_memory_capacity), dtype=int)
+        opponent_actions = -np.ones(shape=(n, self.n_games + max_memory_capacity), dtype=int)
         # Matchups played by opponents so far. Exclusively used for resetting
         matchups_played = np.array(list(map(lambda id: self.players[id].matchups_played, opponent_ids)))
         # Matchups played by opponents so far. Used for updating.
