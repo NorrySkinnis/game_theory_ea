@@ -2,6 +2,7 @@ import numpy as np
 from player import Player
 import random
 import copy
+import matplotlib.pyplot as plt
 
 class Environment:
 
@@ -27,7 +28,9 @@ class Environment:
             Returns:
             None
             """
-        for _ in range(n_generations):
+        player_fitnesses = np.zeros((n_generations, len(self.players)))
+
+        for g in range(n_generations):
             matchups = self.sample_matchups()
             for p in self.players:
                 # Ignore entries with -1, which means no matchup
@@ -35,7 +38,26 @@ class Environment:
                 if len(opponent_ids) == 0:
                     continue              
                 self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
-            # self.evolve()
+                player_fitnesses[g, p.identifier] = self.fitness(p.reward_history)
+            self.evolve()
+        print(player_fitnesses)
+        self.plot_fitness(player_fitnesses)
+
+    def plot_fitness(self, player_fitnesses):
+        maxs = []
+        mins = []
+        avgs = []
+        for generation in player_fitnesses:
+            maxs.append(max(generation))
+            mins.append(min(generation))
+            avgs.append(sum(generation)/len(generation))
+        plt.plot(maxs)
+        plt.plot(avgs)
+        plt.plot(mins)
+        plt.xlabel('generation')
+        plt.ylabel('fitness')
+        plt.legend(['max fitness', 'avg fitness', 'min fitness'])
+        plt.show()
     
     def evolve(self)->None:
         """Evolve generation of players by selecting fittest individuals, generating and mutating offspring
@@ -43,10 +65,6 @@ class Environment:
         # percentage of parents that get to live
         elitism_factor = 0.5
         cull_index = int(elitism_factor * len(self.players))
-
-        # debugging
-        # for player in self.players:
-        #     print(player.action_history)
 
         # sort players in descending order
         self.players.sort()
@@ -79,13 +97,10 @@ class Environment:
 
         for player in self.players:
             player.reset_history()
-        # debugging
-        # for player in self.players:
-        #     print(player.action_history)
 
-
-        # TODO: vectorize computations
-        # unsure
+        # reset ids
+        for i in range(len(self.players)):
+            self.players[i].identifier = i
     
     def sample_matchups(self) -> np.ndarray:
         """ Samples matchups for each player. Currently, with replacement."""
