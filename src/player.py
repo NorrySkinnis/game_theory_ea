@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import random
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -18,6 +19,8 @@ class Player:
         # Has to be smaller than max memory capacity
         self.memory_capacity = memory_capacity if memory_capacity <= Player.max_memory_capacity else Player.max_memory_capacity
         self.brain = MLP(n_input=memory_capacity, n_hidden=4).to(device)
+        self.n_matchups = n_matchups
+        self.n_games = n_games
         self.action_history = -np.ones(shape=(n_matchups, n_games + Player.max_memory_capacity), dtype=int)
         self.reward_history = -np.ones(shape=(n_matchups, n_games), dtype=int)
         self.matchups_played = 0
@@ -37,6 +40,41 @@ class Player:
             """       
         actions = self.brain.forward_non_cuda(history)
         return actions
+    
+    def __lt__(self, other):
+        """Helper function to sort players by reward history
+
+        Args:
+            other (Player): Player to compare total reward to
+
+        Returns:
+            Bool: True if greater, False if smaller
+        """
+        # This won't work until reward history is fixed
+        return np.sum(self.reward_history) > np.sum(other.reward_history)
+    
+    def reset_history(self):
+        """Reset action and reward history of player
+        """
+        self.action_history = -np.ones(shape=(self.n_matchups, self.n_games + Player.max_memory_capacity), dtype=int)
+        self.reward_history = -np.ones(shape=(self.n_matchups, self.n_games), dtype=int)
+        self.matchups_played = 0
+        self.initialize_action_history()
+
+    def mutate(self):
+        """Mutate brain by adding random noise
+        """
+        lower = -1
+        upper = 1
+        for w in self.brain.W1_:
+            w += random.uniform(lower, upper)
+        for w in self.brain.W2_:
+            w += random.uniform(lower, upper)
+        for w in self.brain.Wb1:
+            w += random.uniform(lower, upper)
+        for w in self.brain.Wb2:
+            w += random.uniform(lower, upper)
+
 
 
 class MLP(nn.Module):
