@@ -1,6 +1,7 @@
 import numpy as np
 from player import Player
 import random
+import copy
 
 class Environment:
 
@@ -12,6 +13,8 @@ class Environment:
             fitness: fitness function for evolution algorithm
             """
         self.payoff_matrix = np.array([[(3,3), (0,5)], [(5,0), (1,1)]])
+        self.n_matchups = n_matchups
+        self.n_games = n_games
         self.players = np.array([Player(identifier=i, n_matchups=n_matchups, n_games=n_games) for i in range(n_players)])
         self.n_matchups = n_matchups
         self.n_games = n_games
@@ -32,13 +35,57 @@ class Environment:
                 if len(opponent_ids) == 0:
                     continue              
                 self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
-            self.evolve()
+            # self.evolve()
     
     def evolve(self)->None:
-        # TODO: implement evolution algorithm
-        # TODO: reset player rewards
+        """Evolve generation of players by selecting fittest individuals, generating and mutating offspring
+        """
+        # percentage of parents that get to live
+        elitism_factor = 0.5
+        cull_index = int(elitism_factor * len(self.players))
+
+        # debugging
+        # for player in self.players:
+        #     print(player.action_history)
+
+        # sort players in descending order
+        self.players.sort()
+
+        # find ids of players that will be culled
+        available_ids = []
+        for i in range(cull_index, len(self.players)):
+            available_ids.append(self.players[i].identifier)
+
+        # Generate new players using surviving parents
+        newplayers = []
+
+        for id in available_ids:
+            # create new child
+            child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games)
+
+            # select random parent to inherit brain
+            parent_index = random.randint(0, cull_index-1)
+            child.brain = copy.deepcopy(self.players[parent_index].brain)
+
+            # mutate brain
+            child.mutate()
+            
+            # add child
+            newplayers.append(child)
+
+        # create new generation
+        newplayers = np.array(newplayers)
+        self.players[cull_index:] = newplayers
+
+        for player in self.players:
+            player.reset_history()
+        # debugging
+        # for player in self.players:
+        #     print(player.action_history)
+
+
         # TODO: vectorize computations
-        pass
+        # unsure
     
     def sample_matchups(self) -> np.ndarray:
         """ Samples matchups for each player. Currently, with replacement."""

@@ -13,7 +13,7 @@ from environment import Environment as env
 if __name__=='__main__':
     n_games = 6
     n_matchups = 5
-    n_generations = 1
+    n_generations = 10
 
     env = env(n_players=4, n_games=n_games, n_matchups=n_matchups)
     env.run(n_generations=n_generations, verbose=True)
