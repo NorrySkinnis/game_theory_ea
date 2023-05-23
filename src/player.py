@@ -5,8 +5,7 @@ import torch.nn as nn
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Player:
-
-    # Has to be bigger than memory capacity
+    # Allows to have players with different memory capacities
     max_memory_capacity = 1
     def __init__(self, identifier:int, n_matchups:int, n_games:int, memory_capacity=1):
         """ Args:
@@ -16,7 +15,8 @@ class Player:
             memory_capacity: number of previous actions to consider when making a decision
             """ 
         self.identifier = identifier
-        self.memory_capacity = memory_capacity
+        # Has to be smaller than max memory capacity
+        self.memory_capacity = memory_capacity if memory_capacity <= Player.max_memory_capacity else Player.max_memory_capacity
         self.brain = MLP(n_input=memory_capacity, n_hidden=4).to(device)
         self.action_history = -np.ones(shape=(n_matchups, n_games + Player.max_memory_capacity), dtype=int)
         self.reward_history = -np.ones(shape=(n_matchups, n_games), dtype=int)

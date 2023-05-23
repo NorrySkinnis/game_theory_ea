@@ -17,7 +17,7 @@ class Environment:
         self.n_games = n_games
         self.fitness = fitness 
 
-    def run(self, n_generations:int)->None:
+    def run(self, n_generations:int, verbose=False)->None:
         """ Args:
             n_generations: number of generations to run
             
@@ -31,7 +31,7 @@ class Environment:
                 opponent_ids = matchups[matchups[:,p.identifier]>=0, p.identifier]
                 if len(opponent_ids) == 0:
                     continue              
-                self.simulate_game(player=p, opponent_ids=opponent_ids)
+                self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
             self.evolve()
     
     def evolve(self)->None:
@@ -59,12 +59,13 @@ class Environment:
                 player_set.remove(matchup[1])
         return matchups
 
-    def simulate_game(self, player:Player, opponent_ids:np.ndarray) -> None: 
+    def simulate_game(self, player:Player, opponent_ids:np.ndarray, verbose:bool) -> None: 
         """ Simulates a game between provided player and provided opponents from opponent ids.
         
             Args:
             player: The current player
             opponent_ids: Array of opponent ids
+            verbose: If True, prints information about the game
             
             Returns:
             None
@@ -82,7 +83,13 @@ class Environment:
         # Matchups played by opponents so far. Used for updating.
         matchups_played_updated = matchups_played.copy()
         # Simulate games
+        
+        print(f'----------------------------\nPlayer {player.identifier} vs. Players:{opponent_ids}' if verbose else'')
+        
         for game_i in range(self.n_games): 
+            
+            print(f'----------------------------\nGame {game_i+1}\n----------------------------' if verbose else'')
+            
             # Create set for unique opponent ids for each game
             unique_opponent_ids = set()
             for i, id in enumerate(opponent_ids): 
@@ -99,9 +106,13 @@ class Environment:
                 # (memory capacity - # games played) random moves + (# games played) moves of current player 
                 upper = max_memory_capacity + game_i
                 lower = upper - opponent.memory_capacity
-                action = opponent.act(player.action_history[i + nth_player_matchup - 1, lower:upper])
-                nth_matchup = opponent.matchups_played
+                history = player.action_history[i + nth_player_matchup - 1, lower:upper]
+                action = opponent.act(history)
+                
+                print(f'Opponent {opponent.identifier}, action: {action}, actions observed: {history}' if verbose else '')
+                
                 # Update match count for current opponent in matchups_played_updated
+                nth_matchup = opponent.matchups_played
                 matchups_played_updated[i] = nth_matchup 
                 # Add action to opponent's action history
                 opponent.action_history[nth_matchup, upper] = action
@@ -111,13 +122,20 @@ class Environment:
                 opponent.matchups_played += 1
             # Determine player actions based on slice of all opponents' actions
             upper = max_memory_capacity + game_i
-            lower = upper - player.memory_capacity         
-            player_actions = player.act(opponent_actions[:,lower:upper])
+            lower = upper - player.memory_capacity 
+            history = opponent_actions[:,lower:upper]        
+            player_actions = player.act(history)
+
+            print(f'>> Player\'s actions: {player_actions}, actions observed: {np.ravel(history)}' if verbose else'')
+            
             # Add player actions to player action history
             player.action_history[nth_player_matchup:nth_player_matchup + n, upper] = player_actions
             # Determine rewards for player and opponents
             nth_player_matchup = player.matchups_played
             rewards = self.payoff_matrix[player.action_history[nth_player_matchup:,upper], opponent_actions[:,upper]] 
+            
+            print(f'>> Rewards: Opponents: {rewards[:,1]}, Player: {rewards[:,0]}' if verbose else'')
+            
             # Add rewards to player's reward history
             player.reward_history[nth_player_matchup:, game_i] = rewards[:,0]
             # Add rewards to opponents' reward history
