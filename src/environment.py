@@ -35,7 +35,7 @@ class Environment:
                 if len(opponent_ids) == 0:
                     continue              
                 self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
-            # self.evolve()
+            self.evolve()
     
     def evolve(self)->None:
         """Evolve generation of players by selecting fittest individuals, generating and mutating offspring
@@ -43,10 +43,6 @@ class Environment:
         # percentage of parents that get to live
         elitism_factor = 0.5
         cull_index = int(elitism_factor * len(self.players))
-
-        # debugging
-        # for player in self.players:
-        #     print(player.action_history)
 
         # sort players in descending order
         self.players.sort()
@@ -79,13 +75,10 @@ class Environment:
 
         for player in self.players:
             player.reset_history()
-        # debugging
-        # for player in self.players:
-        #     print(player.action_history)
 
-
-        # TODO: vectorize computations
-        # unsure
+        # reset ids
+        for i in range(len(self.players)):
+            self.players[i].identifier = i
     
     def sample_matchups(self) -> np.ndarray:
         """ Samples matchups for each player. Currently, with replacement."""
