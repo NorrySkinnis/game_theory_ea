@@ -22,8 +22,8 @@ class Player:
         self.n_matchups = n_matchups
         self.n_games = n_games
         self.action_history = -np.ones(shape=(n_matchups, n_games + Player.max_memory_capacity), dtype=int)
-        self.reward_history = -np.ones(shape=(n_matchups, n_games), dtype=int)
-        self.matchups_played = 0
+        self.reward = 0
+        self.n_matchups_played = 0
         self.initialize_action_history()
     
     def initialize_action_history(self)->None:

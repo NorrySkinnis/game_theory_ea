@@ -6,19 +6,17 @@ import matplotlib.pyplot as plt
 
 class Environment:
 
-    def __init__(self, n_players:int, n_matchups:int, n_games:int, fitness=lambda x: np.sum(x)):
+    def __init__(self, n_players:int, n_matchups:int, n_games:int, fitness=lambda x,t:np.power(0.99,t) * np.sum(x)):
         """ Args:
             n_players: number of players
             n_matchups: number of matchups per generation
             n_games: number of games per matchup
-            fitness: fitness function for evolution algorithm
+            fitness: fitness function
             """
         self.payoff_matrix = np.array([[(3,3), (0,5)], [(5,0), (1,1)]])
         self.n_matchups = n_matchups
         self.n_games = n_games
-        self.players = np.array([Player(identifier=i, n_matchups=n_matchups, n_games=n_games) for i in range(n_players)])
-        self.n_matchups = n_matchups
-        self.n_games = n_games
+        self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games) for i in range(n_players)]
         self.fitness = fitness 
 
     def run(self, n_generations:int, verbose=False)->None:
@@ -28,9 +26,7 @@ class Environment:
             Returns:
             None
             """
-        player_fitnesses = np.zeros((n_generations, len(self.players)))
-
-        for g in range(n_generations):
+        for _ in range(n_generations):
             matchups = self.sample_matchups()
             for p in self.players:
                 # Ignore entries with -1, which means no matchup
@@ -38,67 +34,36 @@ class Environment:
                 if len(opponent_ids) == 0:
                     continue              
                 self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
-                player_fitnesses[g, p.identifier] = self.fitness(p.reward_history)
             self.evolve()
-        print(player_fitnesses)
-        self.plot_fitness(player_fitnesses)
 
-    def plot_fitness(self, player_fitnesses):
-        maxs = []
-        mins = []
-        avgs = []
-        for generation in player_fitnesses:
-            maxs.append(max(generation))
-            mins.append(min(generation))
-            avgs.append(sum(generation)/len(generation))
-        plt.plot(maxs)
-        plt.plot(avgs)
-        plt.plot(mins)
-        plt.xlabel('generation')
-        plt.ylabel('fitness')
-        plt.legend(['max fitness', 'avg fitness', 'min fitness'])
-        plt.show()
-    
     def evolve(self)->None:
-        """Evolve generation of players by selecting fittest individuals, generating and mutating offspring
-        """
-        # percentage of parents that get to live
-        elitism_factor = 0.5
-        cull_index = int(elitism_factor * len(self.players))
-
-        # sort players in descending order
-        self.players.sort()
-
-        # find ids of players that will be culled
+        """Evolve generation of players by selecting fittest individuals and generating their mutated mutated offspring."""
+        # Percentage of players that are kept for next generation: Elite
+        elite = 0.5
+        index = int(elite * len(self.players))
+        # Sort players in descending order. Elite is now until index
+        self.players.sort(key=lambda x: x.reward, reverse=True)
+        # Ids of players that do not belong to elite. To be given to new players in next generation
         available_ids = []
-        for i in range(cull_index, len(self.players)):
-            available_ids.append(self.players[i].identifier)
-
+        for i, p in enumerate(self.players[index:]):
+            available_ids.append(p.identifier)
         # Generate new players using surviving parents
-        newplayers = []
-
+        new_players = []
+        # Create new players until all ids are used
         for id in available_ids:
-            # create new child
+            # Create new player
             child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games)
-
-            # select random parent to inherit brain
-            parent_index = random.randint(0, cull_index-1)
+            # Select random parent to inherit brain
+            parent_index = random.randint(0, index-1)
             child.brain = copy.deepcopy(self.players[parent_index].brain)
-
-            # mutate brain
+            # Mutate brain of child
             child.mutate()
-            
-            # add child
-            newplayers.append(child)
+            # Add child
+            new_players.append(child)
+        # Create new generation
+        self.players[index:] = new_players
 
-        # create new generation
-        newplayers = np.array(newplayers)
-        self.players[cull_index:] = newplayers
-
-        for player in self.players:
-            player.reset_history()
-
-        # reset ids
+        # Reset ids, is that needed?
         for i in range(len(self.players)):
             self.players[i].identifier = i
     
@@ -137,20 +102,20 @@ class Environment:
         # Maximum memory capacity of the class player
         max_memory_capacity = Player.max_memory_capacity
         # Number of matchups played by player so far
-        nth_player_matchup = player.matchups_played
+        nth_player_matchup = player.n_matchups_played
         # Create container for opponent actions
         opponent_actions = -np.ones(shape=(n, self.n_games + max_memory_capacity), dtype=int)
         # Matchups played by opponents so far. Exclusively used for resetting
-        matchups_played = np.array(list(map(lambda id: self.players[id].matchups_played, opponent_ids)))
-        # Matchups played by opponents so far. Used for updating.
-        matchups_played_updated = matchups_played.copy()
+        n_matchups_played = np.array(list(map(lambda id: self.players[id].n_matchups_played, opponent_ids)))
         # Simulate games
         
-        print(f'----------------------------\nPlayer {player.identifier} vs. Players:{opponent_ids}' if verbose else'')
+        if verbose:
+            print(f'----------------------------\nPlayer {player.identifier} vs. Players:{opponent_ids}')
         
         for game_i in range(self.n_games): 
             
-            print(f'----------------------------\nGame {game_i+1}\n----------------------------' if verbose else'')
+            if verbose:
+                print(f'----------------------------\nGame {game_i+1}\n----------------------------')
             
             # Create set for unique opponent ids for each game
             unique_opponent_ids = set()
@@ -160,7 +125,7 @@ class Environment:
                 # Reset opponent matchups played if not unique opponent.
                 if id not in unique_opponent_ids:
                     # Reset matchups played by this opponent
-                    opponent.matchups_played = matchups_played[i]
+                    opponent.n_matchups_played = n_matchups_played[i]
                     # Add opponent id to set if not already in set
                     unique_opponent_ids.add(id)            
                 # Opponent's action is based on the last #opponent.memory_capacity moves of current player. 
@@ -171,38 +136,57 @@ class Environment:
                 history = player.action_history[i + nth_player_matchup - 1, lower:upper]
                 action = opponent.act(history)
                 
-                print(f'Opponent {opponent.identifier}, action: {action}, actions observed: {history}' if verbose else '')
+                if verbose:
+                    print(f'Opponent {opponent.identifier}, action: {action}, actions observed: {history}')
                 
                 # Update match count for current opponent in matchups_played_updated
-                nth_matchup = opponent.matchups_played
-                matchups_played_updated[i] = nth_matchup 
+                nth_matchup = opponent.n_matchups_played
                 # Add action to opponent's action history
                 opponent.action_history[nth_matchup, upper] = action
                 # Add action to opponent_actions
                 opponent_actions[i,:] = opponent.action_history[nth_matchup,:]
                 # Increment number of matchups for current opponent 
-                opponent.matchups_played += 1
+                opponent.n_matchups_played += 1
             # Determine player actions based on slice of all opponents' actions
             upper = max_memory_capacity + game_i
             lower = upper - player.memory_capacity 
             history = opponent_actions[:,lower:upper]        
             player_actions = player.act(history)
 
-            print(f'>> Player\'s actions: {player_actions}, actions observed: {np.ravel(history)}' if verbose else'')
+            if verbose:
+                print(f'>> Player\'s actions: {player_actions}, actions observed: {np.ravel(history)}')
             
             # Add player actions to player action history
             player.action_history[nth_player_matchup:nth_player_matchup + n, upper] = player_actions
             # Determine rewards for player and opponents
-            nth_player_matchup = player.matchups_played
+            nth_player_matchup = player.n_matchups_played
             rewards = self.payoff_matrix[player.action_history[nth_player_matchup:,upper], opponent_actions[:,upper]] 
-            
-            print(f'>> Rewards: Opponents: {rewards[:,1]}, Player: {rewards[:,0]}' if verbose else'')
-            
-            # Add rewards to player's reward history
-            player.reward_history[nth_player_matchup:, game_i] = rewards[:,0]
-            # Add rewards to opponents' reward history
+
+            if verbose:
+                print(f'>> Rewards: Opponents: {rewards[:,1]}, Player: {rewards[:,0]}')
+
+            # Reward player
+            player.reward += self.fitness(rewards[:,0], game_i)
+            # Reward opponents
             for i, id in enumerate(opponent_ids):
                 opponent = self.players[id]
-                opponent.reward_history[matchups_played_updated[i]:, game_i] = rewards[i,1]  
-        # Increment number of matchups of player
-        player.matchups_played += n
+                opponent.reward += self.fitness(rewards[i,1], game_i)
+        # Update number of matchups played by player
+        player.n_matchups_played += n
+
+
+    def plot_fitness(self, player_fitnesses):
+        maxs = []
+        mins = []
+        avgs = []
+        for generation in player_fitnesses:
+            maxs.append(max(generation))
+            mins.append(min(generation))
+            avgs.append(sum(generation)/len(generation))
+        plt.plot(maxs)
+        plt.plot(avgs)
+        plt.plot(mins)
+        plt.xlabel('generation')
+        plt.ylabel('fitness')
+        plt.legend(['max fitness', 'avg fitness', 'min fitness'])
+        plt.show()
