@@ -3,6 +3,7 @@ from player import Player
 import random
 import copy
 import matplotlib.pyplot as plt
+import multiprocessing as mp
 
 class Environment:
 
@@ -26,7 +27,11 @@ class Environment:
             Returns:
             None
             """
-        for _ in range(n_generations):
+        for gen_i in range(n_generations):
+
+            if verbose:
+                print(f'----------------------------\nGENERATION {gen_i+1}')
+
             matchups = self.sample_matchups()
             for p in self.players:
                 # Ignore entries with -1, which means no matchup
@@ -37,11 +42,13 @@ class Environment:
             self.evolve()
 
     def evolve(self)->None:
-        """Evolve generation of players by selecting fittest individuals and generating their mutated mutated offspring."""
+        """Evolve generation of players by selecting fittest individuals and 
+           generating their mutated mutated offspring."""
         # Percentage of players that are kept for next generation: Elite
         elite = 0.5
         index = int(elite * len(self.players))
-        # Sort players in descending order. Elite is now until index
+        # Sort players in descending order. Elite is until index
+        # Is it possible to integrate the player.reset() call in here? 
         self.players.sort(key=lambda x: x.reward, reverse=True)
         # Ids of players that do not belong to elite. To be given to new players in next generation
         available_ids = []
@@ -62,10 +69,10 @@ class Environment:
             new_players.append(child)
         # Create new generation
         self.players[index:] = new_players
-
-        # Reset ids, is that needed?
-        for i in range(len(self.players)):
-            self.players[i].identifier = i
+        # Reset player information and ids
+        for i, p in enumerate(self.players):
+            p.reset()
+            p.identifier = i
     
     def sample_matchups(self) -> np.ndarray:
         """ Samples matchups for each player. Currently, with replacement."""
@@ -160,7 +167,7 @@ class Environment:
             player.action_history[nth_player_matchup:nth_player_matchup + n, upper] = player_actions
             # Determine rewards for player and opponents
             nth_player_matchup = player.n_matchups_played
-            rewards = self.payoff_matrix[player.action_history[nth_player_matchup:,upper], opponent_actions[:,upper]] 
+            rewards = self.payoff_matrix[player.action_history[nth_player_matchup,upper], opponent_actions[:,upper]] 
 
             if verbose:
                 print(f'>> Rewards: Opponents: {rewards[:,1]}, Player: {rewards[:,0]}')
