@@ -1,35 +1,56 @@
 import numpy as np
+from player import Player
+
+
+actions_dict = {
+				"C": 0,
+				"D": 1
+				}
 
 
 class StrategyDetector:
 	def __init__(self, possible_strats, games=10):
 		self.games = games
-		self.detection_strategy = ["C", "C", "C", "C", "C", "D", "D", "D", "D", "D"]
-		self.change = 5
+		# 0 is cooperate, 1 is defect
+		self.detection_strategy = np.concatenate((np.zeros(self.games//2), np.ones(self.games//2)))
+		self.change = games//2
 		self.possible_strats = possible_strats
-		self.action_history = []
+		self.action_history = []  # gets initialised and modified in detect function
+
 
 	def detect(self, player):
 		"""Runs a few games to detect the strategy of a player"""
-		player.clear_history()
+		# player.reset()
+		# prepare action history based on memory capacity of opponent
+		self.action_history = -np.ones(shape=(1, self.games + player.memory_capacity), dtype=int)
+		pre_cooperate = np.zeros(shape=(1, player.memory_capacity))
+		self.action_history[:, :player.memory_capacity] = pre_cooperate  # prepends actions to history
+
 		opponent_history = []
 		for g in range(self.games):
 			my_action = self.detection_strategy[g]
-			opponent_history.append(player.choose_action(self))
-			self.action_history.append(my_action)
+			upper = Player.max_memory_capacity + g
+			lower = upper - player.memory_capacity
+			self.action_history[:, upper] = my_action
+			history = self.action_history[:, lower:upper]
+			opponent_history.append(player.act(history))
+
 		verdict = self.analyze_history(opponent_history)
 		self.action_history = []
 		return verdict
 
 	def analyze_history(self, opponent_history):
-		if 'C' not in opponent_history:
+		# Hawk
+		if actions_dict['C'] not in opponent_history:
 			return "Hawk"
-		elif 'D' not in opponent_history:
+		# Dove
+		elif actions_dict['D'] not in opponent_history:
 			return "Dove"
 		# tit for tat
-		if opponent_history[self.change] == 'C' and 'D' not in opponent_history[:self.change] and \
-			'C' not in opponent_history[self.change+1:]:
+		if opponent_history[self.change] == actions_dict['C'] and actions_dict['D'] not in \
+				opponent_history[:self.change] and actions_dict['C'] not in opponent_history[self.change+1:]:
 			return 'Tit for Tat'
+		# else random
 		return 'Random/Undetermined'
 
 
@@ -45,8 +66,9 @@ class PlayerStrategy:
 	def __init__(self, name):
 		self.identifier = name
 		self.action_history = []
+		self.memory_capacity = 1
 
-	def choose_action(self, opponent):
+	def act(self, opponent):
 		pass
 
 	def reset(self):
@@ -57,39 +79,39 @@ class TitForTat(PlayerStrategy):
 	def __init__(self):
 		super().__init__("TitForTat")
 
-	def choose_action(self, opponent):
-		if len(opponent.history) == 0:
-			self.action_history.append("C")
-			return "C"
+	def act(self, history):
+		if len(history) == 0:
+			self.action_history.append(actions_dict["C"])
+			return actions_dict["C"]  # cooperate
 		else:
-			self.action_history.append(opponent.history[-1])
-			return opponent.history[-1]
+			self.action_history.append(history[-1])
+			return history[-1]
 
 
 class Dove(PlayerStrategy):
 	def __init__(self):
 		super().__init__("Dove")
 
-	def choose_action(self, opponent):
-		self.action_history.append("C")
-		return "C"
+	def act(self, history):
+		self.action_history.append(actions_dict["C"])
+		return actions_dict["C"]
 
 
 class Hawk(PlayerStrategy):
 	def __init__(self):
 		super().__init__("Hawk")
 
-	def choose_action(self, opponent):
-		self.action_history.append("D")
-		return "D"
+	def act(self, history):
+		self.action_history.append(actions_dict["D"])
+		return actions_dict["D"]
 
 
 class Random(PlayerStrategy):
 	def __init__(self):
 		super().__init__("Random")
 
-	def choose_action(self, opponent):
-		self.action_history.append(np.random.choice(["C", "D"]))
+	def act(self, history):
+		self.action_history.append(np.random.choice([0, 1]))
 		return self.action_history[-1]
 
 

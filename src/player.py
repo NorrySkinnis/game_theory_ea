@@ -11,12 +11,13 @@ class Player:
     max_memory_capacity = 1
 
     def __init__(self, identifier: int, n_matchups: int, n_games: int, memory_capacity=1):
-        """ Args:
+        """
+        Args:
             identifier: unique identifier for player
             n_matchups: number of matchups per generation
             n_games: number of games per matchup
-            memory_capacity: number of previous actions to consider when making a decision
-            """ 
+            memory_capacity: (optional) number of previous actions to consider when making a decision
+        """
         self.identifier = identifier
         # Has to be smaller than max memory capacity
         self.memory_capacity = memory_capacity if memory_capacity <= Player.max_memory_capacity else Player.max_memory_capacity

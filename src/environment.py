@@ -17,7 +17,7 @@ class Environment:
             n_games: number of games per matchup
             fitness: fitness function
         """
-        self.payoff_matrix = np.array([[(3,3), (0,5)], [(5,0), (1,1)]])
+        self.payoff_matrix = np.array([[(3, 3), (0, 5)], [(5, 0), (1, 1)]])
         self.n_matchups = n_matchups
         self.n_games = n_games
         self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity)
@@ -186,7 +186,6 @@ class Environment:
                 opponent.reward += self.fitness(rewards[i,1], game_i)
         # Update number of matchups played by player
         player.n_matchups_played += n
-
 
     def plot_fitness(self, player_fitnesses):
         maxs = []
