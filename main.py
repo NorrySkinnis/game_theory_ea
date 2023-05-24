@@ -10,22 +10,34 @@ sys.path.append(module_path)
 from environment import Environment as env
 
 
-if __name__=='__main__':
-    n_games = 10
-<<<<<<< Updated upstream
-    n_matchups = 5
-<<<<<<< HEAD
-    n_generations = 1
-=======
-    n_generations = 100
-=======
-    n_matchups = 10
-    n_generations = 1
->>>>>>> Stashed changes
->>>>>>> Flo
+if __name__ == '__main__':
+    # use command line args as follows:
+    # python main.py -players 1 -games 2 -generations 3 -matchups 4 -v
 
-    env = env(n_players=10, n_games=n_games, n_matchups=n_matchups)
-    env.run(n_generations=n_generations, verbose=False)
+    # default values if not command line args are given
+    n_games = 10
+    n_matchups = 5
+    n_generations = 1
+    n_players = 10
+    verbose = False
+    memory_capacity = 1
+
+    for i, arg in enumerate(sys.argv):
+        if arg == '-players':
+            n_players = int(sys.argv[i+1])
+        elif arg == '-games':
+            n_games = int(sys.argv[i+1])
+        elif arg == '-matchups':
+            n_matchups = int(sys.argv[i+1])
+        elif arg == '-generations':
+            n_generations = int(sys.argv[i+1])
+        elif arg == '-v':
+            verbose = True
+        elif arg == '-mem_global':
+            memory_capacity = int(sys.argv[i+1])
+
+    env = env(n_players=n_players, n_games=n_games, n_matchups=n_matchups, memory_capacity=memory_capacity)
+    env.run(n_generations=n_generations, verbose=verbose)
     for p in env.players:
         print(p.reward)
         print(p.n_matchups_played)

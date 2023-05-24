@@ -5,28 +5,34 @@ import copy
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 
+
 class Environment:
 
-    def __init__(self, n_players:int, n_matchups:int, n_games:int, fitness=lambda x,t:np.power(0.99,t) * np.sum(x)):
-        """ Args:
+    def __init__(self, n_players: int, n_matchups: int, n_games: int, memory_capacity: int,
+                 fitness=lambda x, t: np.power(0.99, t) * np.sum(x)):
+        """
+        Args:
             n_players: number of players
             n_matchups: number of matchups per generation
             n_games: number of games per matchup
             fitness: fitness function
-            """
+        """
         self.payoff_matrix = np.array([[(3,3), (0,5)], [(5,0), (1,1)]])
         self.n_matchups = n_matchups
         self.n_games = n_games
-        self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games) for i in range(n_players)]
+        self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity)
+                        for i in range(n_players)]
         self.fitness = fitness 
 
-    def run(self, n_generations:int, verbose=False)->None:
-        """ Args:
+    def run(self, n_generations: int, verbose=False) -> None:
+        """
+        Args:
             n_generations: number of generations to run
+            verbose: if True, print more info
             
             Returns:
             None
-            """
+        """
         for gen_i in range(n_generations):
 
             if verbose:

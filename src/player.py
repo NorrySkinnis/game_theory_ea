@@ -5,10 +5,12 @@ import random
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 class Player:
     # Allows to have players with different memory capacities
     max_memory_capacity = 1
-    def __init__(self, identifier:int, n_matchups:int, n_games:int, memory_capacity=1):
+
+    def __init__(self, identifier: int, n_matchups: int, n_games: int, memory_capacity=1):
         """ Args:
             identifier: unique identifier for player
             n_matchups: number of matchups per generation
