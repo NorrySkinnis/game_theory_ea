@@ -4,6 +4,7 @@ import random
 import copy
 import matplotlib.pyplot as plt
 import multiprocessing as mp
+from strategy_detector import detect_strategy
 
 
 class Environment:
@@ -41,15 +42,17 @@ class Environment:
             matchups = self.sample_matchups()
             for p in self.players:
                 # Ignore entries with -1, which means no matchup
-                opponent_ids = matchups[matchups[:,p.identifier]>=0, p.identifier]
+                opponent_ids = matchups[matchups[:, p.identifier] >= 0, p.identifier]
                 if len(opponent_ids) == 0:
                     continue              
                 self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
             self.evolve()
 
-    def evolve(self)->None:
-        """Evolve generation of players by selecting fittest individuals and 
-           generating their mutated mutated offspring."""
+    def evolve(self) -> None:
+        """
+        Evolve generation of players by selecting the fittest individuals and
+        generating their mutated offspring.
+        """
         # Percentage of players that are kept for next generation: Elite
         elite = 0.5
         index = int(elite * len(self.players))

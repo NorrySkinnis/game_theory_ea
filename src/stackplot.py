@@ -9,9 +9,14 @@ def plot(data, name, title='', save=True):
 	y = [[] for i in strats.keys()]
 	for gen_data in data:
 		c = Counter(gen_data)
+		for k in strats.keys():
+			if k not in c.keys():
+				c[k] = 0
 		for k in c.keys():
 			y[k].append(c[k])
 
+	# print(generations.shape)
+	# print(y.shape)
 	plt.stackplot(generations, y)
 	plt.title(title)
 	plt.xlabel('Generations')
@@ -24,10 +29,11 @@ def plot(data, name, title='', save=True):
 		plt.show()
 
 
-# generate some dummy data
-generations = 100
-gen_size = 100
-strats = {0: 'TitForTat', 1: "Dove", 2: "Hawk", 3: "Random"}
-dummy_data = np.random.choice(list(strats.keys()), (generations, gen_size), p=[0.45, 0.25, 0.25, 0.05])
+if __name__ == '__main__':
+	# generate some dummy data
+	generations = 100
+	gen_size = 100
+	strats = {0: 'TitForTat', 1: "Dove", 2: "Hawk", 3: "Random"}
+	dummy_data = np.random.choice(list(strats.keys()), (generations, gen_size), p=[0.25, 0.25, 0.25, 0.25])
 
-plot(dummy_data, "dummy_data", title="Distribution over time per strategy")
+	plot(dummy_data, "dummy_data", title="Distribution over time per strategy")
