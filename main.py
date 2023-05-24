@@ -15,10 +15,10 @@ if __name__ == '__main__':
     # python main.py -players 1 -games 2 -generations 3 -matchups 4 -v
 
     # default values if not command line args are given
-    n_games = 10
+    n_games = 3
     n_matchups = 5
     n_generations = 1
-    n_players = 10
+    n_players = 1
     verbose = False
     memory_capacity = 1
 
