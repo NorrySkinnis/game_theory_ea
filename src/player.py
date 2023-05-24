@@ -1,14 +1,13 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import random
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 class Player:
     # Allows to have players with different memory capacities
-    max_memory_capacity = 1
-    def __init__(self, identifier:int, n_matchups:int, n_games:int, memory_capacity=1):
+    max_memory_capacity = 5
+    def __init__(self, identifier:int, n_matchups:int, n_games:int, memory_capacity=2):
         """ Args:
             identifier: unique identifier for player
             n_matchups: number of matchups per generation
@@ -27,9 +26,9 @@ class Player:
         self.initialize_action_history()
     
     def initialize_action_history(self)->None:
-        """Initializes action history with random actions."""
-        random_actions = np.random.randint(2, size=(self.action_history.shape[0], Player.max_memory_capacity))
-        self.action_history[:,:Player.max_memory_capacity] = random_actions
+        """Initializes first max_memory_capacity actions for all matchups with zeros."""
+        init_actions = np.zeros(shape=(self.action_history.shape[0], Player.max_memory_capacity))
+        self.action_history[:,:Player.max_memory_capacity] = init_actions
         
     def act(self, history: np.ndarray) -> np.ndarray: 
         """ Args:
@@ -37,7 +36,7 @@ class Player:
             
             Returns:
             actions: array of 0s and 1s, corresponding to cooperate or defect
-            """       
+            """    
         actions = self.brain.forward_non_cuda(history)
         return actions
     
@@ -64,7 +63,6 @@ class MLP(nn.Module):
             activation: activation function for hidden layer (default: ReLU)
             """
         super(MLP, self).__init__()
-        self.n_input = n_input
         self.W1 = nn.Linear(n_input, n_hidden, bias=bias)
         self.W2 = nn.Linear(n_hidden, 1, bias=bias)
         self.relu = nn.ReLU()
@@ -91,7 +89,13 @@ class MLP(nn.Module):
         return out
 
     def forward_non_cuda(self, X: np.ndarray)->np.ndarray:
-        """Forward pass not using cuda"""
+        """ Args:
+            X: input matrix of shape (n, m), where n is the number of opponents 
+               and m is the number of actions observed 
+
+            Returns:
+            output: output matrix of shape (n, 1), one action for each opponent
+            """ 
         output = self.f1(X @ self.W1_ + self.Wb1) @ self.W2_ + self.Wb2
         output = np.array(output >= 0, dtype=bool) * 1
         output = np.reshape(output, (output.shape[0],))
