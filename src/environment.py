@@ -1,33 +1,36 @@
-import numpy as np
 from player import Player
+from evaluation import Evaluater
+import numpy as np
 import random
 import copy
-import matplotlib.pyplot as plt
-import multiprocessing as mp
+from tqdm import tqdm
 
 class Environment:
 
-    def __init__(self, n_players:int, n_matchups:int, n_games:int, fitness=lambda x,t:np.power(0.99,t) * np.sum(x)):
+    def __init__(self, n_players:int, n_matchups:int, n_games:int, n_generations:int, fitness=lambda x,t:np.power(0.99,t) * np.sum(x)):
         """ Args:
             n_players: number of players
             n_matchups: number of matchups per generation
             n_games: number of games per matchup
+            n_generations: number of generations to run
             fitness: fitness function
             """
         self.payoff_matrix = np.array([[(3,3), (0,5)], [(5,0), (1,1)]])
         self.n_matchups = n_matchups
         self.n_games = n_games
+        self.n_generations = n_generations
         self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games) for i in range(n_players)]
         self.fitness = fitness 
+        self.evaluater = Evaluater(players=self.players, n_generations=n_generations)
 
-    def run(self, n_generations:int, verbose=False)->None:
+    def run(self, verbose=False)->None:
         """ Args:
-            n_generations: number of generations to run
+            verbose: If True, prints information about the game
             
             Returns:
             None
             """
-        for gen_i in range(n_generations):
+        for gen_i in tqdm(range(self.n_generations)):
 
             if verbose:
                 print(f'----------------------------\nGENERATION {gen_i+1}')
@@ -39,6 +42,7 @@ class Environment:
                 if len(opponent_ids) == 0:
                     continue              
                 self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
+                self.evaluater.update(player=p, nth_generation=gen_i)
             self.evolve()
 
     def evolve(self)->None:
@@ -58,10 +62,10 @@ class Environment:
         new_players = []
         # Create new players until all ids are used
         for id in available_ids:
-            # Create new player
-            child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games)
             # Select random parent to inherit brain
             parent_index = random.randint(0, index-1)
+            # Create new player
+            child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=self.players[parent_index].memory_capacity)
             child.brain = copy.deepcopy(self.players[parent_index].brain)
             # Mutate brain of child
             child.mutate()
@@ -180,20 +184,3 @@ class Environment:
                 opponent.reward += self.fitness(rewards[i,1], game_i)
         # Update number of matchups played by player
         player.n_matchups_played += n
-
-
-    def plot_fitness(self, player_fitnesses):
-        maxs = []
-        mins = []
-        avgs = []
-        for generation in player_fitnesses:
-            maxs.append(max(generation))
-            mins.append(min(generation))
-            avgs.append(sum(generation)/len(generation))
-        plt.plot(maxs)
-        plt.plot(avgs)
-        plt.plot(mins)
-        plt.xlabel('generation')
-        plt.ylabel('fitness')
-        plt.legend(['max fitness', 'avg fitness', 'min fitness'])
-        plt.show()
