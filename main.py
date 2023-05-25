@@ -38,7 +38,7 @@ if __name__ == '__main__':
             
     env = env(n_players=n_players, n_games=n_games, n_matchups=n_matchups, n_generations=n_generations, memory_capacity=memory_capacity)
     env.run(verbose=verbose)
-    env.evaluater.plot_fitness(max=True, min=True)
+    env.evaluator.plot_fitness(max=True, min=True)
     
 
 

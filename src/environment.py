@@ -1,5 +1,5 @@
 from player import Player
-from evaluation import Evaluater
+from evaluation import Evaluator
 import numpy as np
 import random
 import copy
@@ -28,7 +28,7 @@ class Environment:
         self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity)
                         for i in range(n_players)]
         self.fitness = fitness 
-        self.evaluater = Evaluater(players=self.players, n_generations=n_generations)
+        self.evaluator = Evaluator(players=self.players, n_generations=n_generations)
 
     def run(self, verbose=False)->None:
         """ 
@@ -37,7 +37,7 @@ class Environment:
             
             Returns:
             None
-        """            
+        """
         for gen_i in tqdm(range(self.n_generations)):
 
             if verbose:
@@ -50,7 +50,8 @@ class Environment:
                 if len(opponent_ids) == 0:
                     continue              
                 self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
-                self.evaluater.update(player=p, nth_generation=gen_i)
+                verdict = detect_strategy(player=p, verbose=verbose)
+                self.evaluator.update(player=p, nth_generation=gen_i, verdict=verdict)
             self.evolve()
 
     def evolve(self) -> None:
@@ -101,23 +102,24 @@ class Environment:
                 # Random sample of 2 players. Also O(1)
                 matchup = random.sample(player_set, 2)
                 # Neglect reverse matchup. Prioritize lower id, makes forward passes more efficient 
-                matchups[i,np.min(matchup)] = np.max(matchup)
+                matchups[i, np.min(matchup)] = np.max(matchup)
                 # Remove players from set to ensure same number of games for each player
                 player_set.remove(matchup[0])
                 player_set.remove(matchup[1])
         return matchups
 
     def simulate_game(self, player:Player, opponent_ids:np.ndarray, verbose:bool) -> None: 
-        """ Simulates a game between provided player and provided opponents from opponent ids.
+        """
+        Simulates a game between provided player and provided opponents from opponent ids.
         
-            Args:
+        Args:
             player: The current player
             opponent_ids: Array of opponent ids
             verbose: If True, prints information about the game
             
-            Returns:
+        Returns:
             None
-            """
+        """
         # Number of opponents
         n = len(opponent_ids)
         # Maximum memory capacity of the class player
@@ -171,7 +173,7 @@ class Environment:
             # Determine player actions based on slice of all opponents' actions
             upper = max_memory_capacity + game_i
             lower = upper - player.memory_capacity 
-            history = opponent_actions[:,lower:upper]        
+            history = opponent_actions[:, lower:upper]
             player_actions = player.act(history)
 
             if verbose:

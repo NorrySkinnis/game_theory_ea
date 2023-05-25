@@ -17,7 +17,6 @@ class StrategyDetector:
 		self.possible_strats = possible_strats
 		self.action_history = []  # gets initialised and modified in detect function
 
-
 	def detect(self, player):
 		"""Runs a few games to detect the strategy of a player"""
 		# player.reset()
