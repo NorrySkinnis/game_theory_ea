@@ -4,7 +4,7 @@ from constants import ACTIONS, STRATS
 
 
 class StrategyDetector:
-	def __init__(self, games=10):
+	def __init__(self, games=20):
 		self.games = games
 		# 0 is cooperate, 1 is defect
 		self.detection_strategy = np.concatenate((np.zeros(self.games//2), np.ones(self.games//2)))
@@ -108,15 +108,16 @@ class Random(PlayerStrategy):
 		return self.action_history[-1]
 
 
-def detect_strategy(player, verbose=False):
+def detect_strategy(player, games=20, verbose=False):
 	"""
 	Runs a few games to detect the strategy of a player.
 	Args:
 		player: a Player object
+		games: (optional) number of games that are played to detect the strategy
 		verbose: whether to print the result
 	"""
 
-	detector = StrategyDetector()
+	detector = StrategyDetector(games=games)
 
 	verdict = detector.detect(player=player)
 	if verbose:

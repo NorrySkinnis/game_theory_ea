@@ -58,11 +58,14 @@ class Evaluator:
         plt.xlabel('Generations')
         plt.ylabel('Relative strategy distribution (%)')  # make labels so it lines up with colour
         plt.legend([STRATS[k] for k in STRATS.keys()])
+        plt.margins(x=0)
+        plt.margins(y=0)
 
         if save:
             if name:
-                plt.savefig('src/figures/' + name + '.png')
+                plt.savefig('src/figures/' + name + '.png', bbox_inches='tight')
             else:
-                plt.savefig(f'src/figures/stackplot_g{self.n_generations}_p{len(self.players)}.png')
+                plt.savefig(f'src/figures/stackplot_g{self.n_generations}_p{len(self.players)}.png',
+                            bbox_inches='tight')
         else:
             plt.show()
