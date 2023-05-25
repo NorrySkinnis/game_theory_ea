@@ -15,16 +15,18 @@ if __name__ == '__main__':
     # python main.py -players 1 -games 2 -generations 3 -matchups 4 -v
 
     # default values if not command line args are given
-    n_games = 3
+    n_games = 5
     n_matchups = 5
-    n_generations = 1
-    n_players = 1
-    verbose = False
+    n_generations = 2
+    n_players = 2  # at least 2
+    verbose = True
     memory_capacity = 1
 
     for i, arg in enumerate(sys.argv):
         if arg == '-players':
             n_players = int(sys.argv[i + 1])
+            if n_players < 2:
+                raise ValueError('Number of players must be at least 2')
         elif arg == '-matchups':
             n_matchups = int(sys.argv[i + 1])
         elif arg == '-games':
@@ -35,10 +37,13 @@ if __name__ == '__main__':
             verbose = True
         elif arg == '-mem_global':
             memory_capacity = int(sys.argv[i+1])
+            if memory_capacity < 1:
+                raise ValueError('Memory capacity must be at least 1')
             
     env = env(n_players=n_players, n_games=n_games, n_matchups=n_matchups, n_generations=n_generations, memory_capacity=memory_capacity)
     env.run(verbose=verbose)
     env.evaluator.plot_fitness(max=True, min=True)
+    env.evaluator.plot_strategies(title=f'Strategies over generations, gen={n_generations}, players={n_players}')
     
 
 

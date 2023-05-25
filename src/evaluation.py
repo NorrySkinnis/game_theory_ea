@@ -2,15 +2,16 @@ from player import Player
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
+from constants import STRATS
 
 
 class Evaluator:
 
     def __init__(self, players:list[Player], n_generations:int):
         self.n_generations = n_generations
+        self.players = players
         self.rewards_per_gen = np.zeros(shape=(len(players), n_generations))
         self.memory_capacities_per_gen = np.zeros(shape=(len(players), n_generations))
-        self.strats = {0: 'TitForTat', 1: "Dove", 2: "Hawk", 3: "Random"}
         self.strategy_data = np.empty(shape=(self.n_generations, len(players)))
 
     def update(self, player:Player, nth_generation:int, verdict:int)->None:
@@ -32,27 +33,36 @@ class Evaluator:
         plt.legend()
         plt.show()
 
-    def plot_strategies(self, data, name, title='', save=True):
+    def plot_strategies(self, name=None, title='', save=True):
+        """
+        Plot the distribution of strategies over generations.
+
+        Args:
+            name: (optional) name of the file to save the figure
+            title: (optional) title of the figure
+            save: (optional) if True, save the figure to 'figures/' directory
+        """
         plt.figure()
-        generations = np.arange(data.shape[0])
-        y = [[] for i in self.strats.keys()]
-        for gen_data in data:
+        generations = np.arange(self.strategy_data.shape[0])
+        y = [[] for _ in STRATS.keys()]
+        for gen_data in self.strategy_data:
             c = Counter(gen_data)
-            for k in self.strats.keys():
+            for k in STRATS.keys():
                 if k not in c.keys():
                     c[k] = 0
             for k in c.keys():
-                y[k].append(c[k])
+                y[int(k)].append(c[int(k)])
 
-        # print(generations.shape)
-        # print(y.shape)
         plt.stackplot(generations, y)
         plt.title(title)
         plt.xlabel('Generations')
         plt.ylabel('Relative strategy distribution (%)')  # make labels so it lines up with colour
-        plt.legend([strats[k] for k in strats.keys()])
+        plt.legend([STRATS[k] for k in STRATS.keys()])
 
         if save:
-            plt.savefig('figures/' + name + '.png')
+            if name:
+                plt.savefig('src/figures/' + name + '.png')
+            else:
+                plt.savefig(f'src/figures/stackplot_g{self.n_generations}_p{len(self.players)}.png')
         else:
             plt.show()

@@ -1,20 +1,14 @@
 import numpy as np
 from player import Player
-
-
-actions_dict = {
-				"C": 0,
-				"D": 1
-				}
+from constants import ACTIONS, STRATS
 
 
 class StrategyDetector:
-	def __init__(self, possible_strats, games=10):
+	def __init__(self, games=10):
 		self.games = games
 		# 0 is cooperate, 1 is defect
 		self.detection_strategy = np.concatenate((np.zeros(self.games//2), np.ones(self.games//2)))
 		self.change = games//2
-		self.possible_strats = possible_strats
 		self.action_history = []  # gets initialised and modified in detect function
 
 	def detect(self, player):
@@ -28,7 +22,7 @@ class StrategyDetector:
 		opponent_history = []
 		for g in range(self.games):
 			my_action = self.detection_strategy[g]
-			upper = Player.max_memory_capacity + g
+			upper = player.memory_capacity + g
 			lower = upper - player.memory_capacity
 			self.action_history[:, upper] = my_action
 			history = self.action_history[:, lower:upper]
@@ -40,17 +34,17 @@ class StrategyDetector:
 
 	def analyze_history(self, opponent_history):
 		# Hawk
-		if actions_dict['C'] not in opponent_history:
-			return "Hawk"
+		if ACTIONS['C'] not in opponent_history:
+			return 2  # Hawk
 		# Dove
-		elif actions_dict['D'] not in opponent_history:
-			return "Dove"
+		elif ACTIONS['D'] not in opponent_history:
+			return 1  # Dove
 		# tit for tat
-		if opponent_history[self.change] == actions_dict['C'] and actions_dict['D'] not in \
-				opponent_history[:self.change] and actions_dict['C'] not in opponent_history[self.change+1:]:
-			return 'Tit for Tat'
+		if opponent_history[self.change] == ACTIONS['C'] and ACTIONS['D'] not in \
+				opponent_history[:self.change] and ACTIONS['C'] not in opponent_history[self.change + 1:]:
+			return 0  # TitForTat
 		# else random
-		return 'Random/Undetermined'
+		return 3  # Random/Undetermined
 
 
 """
@@ -80,8 +74,8 @@ class TitForTat(PlayerStrategy):
 
 	def act(self, history):
 		if len(history) == 0:
-			self.action_history.append(actions_dict["C"])
-			return actions_dict["C"]  # cooperate
+			self.action_history.append(ACTIONS["C"])
+			return ACTIONS["C"]  # cooperate
 		else:
 			self.action_history.append(history[-1])
 			return history[-1]
@@ -92,8 +86,8 @@ class Dove(PlayerStrategy):
 		super().__init__("Dove")
 
 	def act(self, history):
-		self.action_history.append(actions_dict["C"])
-		return actions_dict["C"]
+		self.action_history.append(ACTIONS["C"])
+		return ACTIONS["C"]
 
 
 class Hawk(PlayerStrategy):
@@ -101,8 +95,8 @@ class Hawk(PlayerStrategy):
 		super().__init__("Hawk")
 
 	def act(self, history):
-		self.action_history.append(actions_dict["D"])
-		return actions_dict["D"]
+		self.action_history.append(ACTIONS["D"])
+		return ACTIONS["D"]
 
 
 class Random(PlayerStrategy):
@@ -122,12 +116,11 @@ def detect_strategy(player, verbose=False):
 		verbose: whether to print the result
 	"""
 
-	possible_strats = [TitForTat(), Dove(), Hawk(), Random()]
-	detector = StrategyDetector([c.identifier for c in possible_strats])
+	detector = StrategyDetector()
 
 	verdict = detector.detect(player=player)
 	if verbose:
-		print(f"Player {player.identifier} is seen as: {verdict}")
+		print(f"Player {player.identifier} is seen as: {STRATS[verdict]}")
 	return verdict
 
 
