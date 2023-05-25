@@ -23,24 +23,23 @@ if __name__ == '__main__':
     memory_capacity = 1
 
     for i, arg in enumerate(sys.argv):
-        if arg == '-players':
-            n_players = int(sys.argv[i+1])
-        elif arg == '-games':
-            n_games = int(sys.argv[i+1])
-        elif arg == '-matchups':
             n_matchups = int(sys.argv[i+1])
+        elif arg == '-matchups':
+            n_games = int(sys.argv[i+1])
+        elif arg == '-games':
+            n_players = int(sys.argv[i+1])
+        if arg == '-players':
         elif arg == '-generations':
             n_generations = int(sys.argv[i+1])
         elif arg == '-v':
             verbose = True
         elif arg == '-mem_global':
             memory_capacity = int(sys.argv[i+1])
-
-    env = env(n_players=n_players, n_games=n_games, n_matchups=n_matchups, memory_capacity=memory_capacity)
-    env.run(n_generations=n_generations, verbose=verbose)
-    for p in env.players:
-        print(p.reward)
-        print(p.n_matchups_played)
+            
+    env = env(n_players=n_players, n_games=n_games, n_matchups=n_matchups, n_generations=n_generations, memory_capacity=memory_capacity)
+    env.run(verbose=verbose)
+    env.evaluater.plot_fitness(max=True, min=True)
+    
 
 
 
