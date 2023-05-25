@@ -34,12 +34,13 @@ class Player:
         self.action_history[:,:Player.max_memory_capacity] = init_actions
         
     def act(self, history: np.ndarray) -> np.ndarray: 
-        """ Args:
+        """
+        Args:
             history: array of observed actions
             
-            Returns:
+        Returns:
             actions: array of 0s and 1s, corresponding to cooperate or defect
-            """    
+        """
         actions = self.brain.forward_non_cuda(history)
         return actions
     

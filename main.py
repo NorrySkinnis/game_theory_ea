@@ -23,12 +23,12 @@ if __name__ == '__main__':
     memory_capacity = 1
 
     for i, arg in enumerate(sys.argv):
-            n_matchups = int(sys.argv[i+1])
-        elif arg == '-matchups':
-            n_games = int(sys.argv[i+1])
-        elif arg == '-games':
-            n_players = int(sys.argv[i+1])
         if arg == '-players':
+            n_players = int(sys.argv[i + 1])
+        elif arg == '-matchups':
+            n_matchups = int(sys.argv[i + 1])
+        elif arg == '-games':
+            n_games = int(sys.argv[i + 1])
         elif arg == '-generations':
             n_generations = int(sys.argv[i+1])
         elif arg == '-v':
