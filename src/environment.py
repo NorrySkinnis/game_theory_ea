@@ -12,13 +12,15 @@ from tqdm import tqdm
 class Environment:
 
     def __init__(self, n_players: int, n_matchups: int, n_games: int, n_generations: int, memory_capacity: int,
-                 fitness=lambda x, t: np.power(0.99, t) * np.sum(x)):
+                 strat_detector=True, fitness=lambda x, t: np.power(0.99, t) * np.sum(x)):
         """
         Args:
             n_players: number of players
             n_matchups: number of matchups per generation
             n_games: number of games per matchup
             n_generations: number of generations to run
+            memory_capacity: number of previous games to remember
+            strat_detector: if True, strategy detector is used
             fitness: fitness function
         """
         self.payoff_matrix = np.array([[(3, 3), (0, 5)], [(5, 0), (1, 1)]])
@@ -27,6 +29,7 @@ class Environment:
         self.n_generations = n_generations
         self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity)
                         for i in range(n_players)]
+        self.strat_detector = strat_detector
         self.fitness = fitness 
         self.evaluator = Evaluator(players=self.players, n_generations=n_generations)
 
@@ -38,6 +41,7 @@ class Environment:
             Returns:
             None
         """
+        verdict = None  # default value when strat detector is off
         for gen_i in tqdm(range(self.n_generations)):
 
             if verbose:
@@ -47,7 +51,8 @@ class Environment:
             for p in self.players:
                 # Ignore entries with -1, which means no matchup
                 opponent_ids = matchups[matchups[:, p.identifier] >= 0, p.identifier]
-                verdict = detect_strategy(player=p, verbose=verbose)
+                if self.strat_detector:
+                    verdict = detect_strategy(player=p, verbose=verbose)
                 self.evaluator.update(player=p, nth_generation=gen_i, verdict=verdict)
                 if len(opponent_ids) == 0:
                     continue              

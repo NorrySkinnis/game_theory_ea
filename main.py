@@ -15,12 +15,13 @@ if __name__ == '__main__':
     # python main.py -players 1 -games 2 -generations 3 -matchups 4 -v
 
     # default values if not command line args are given
-    n_games = 5
-    n_matchups = 5
-    n_generations = 10
-    n_players = 10  # at least 2
-    verbose = True
-    memory_capacity = 1
+    n_games = 100
+    n_matchups = 10
+    n_generations = 20
+    n_players = 100  # at least 2
+    memory_capacity = 1  # at least 1
+    verbose = False
+    strat_detector = True
 
     for i, arg in enumerate(sys.argv):
         if arg == '-players':
@@ -40,10 +41,12 @@ if __name__ == '__main__':
             if memory_capacity < 1:
                 raise ValueError('Memory capacity must be at least 1')
             
-    env = env(n_players=n_players, n_games=n_games, n_matchups=n_matchups, n_generations=n_generations, memory_capacity=memory_capacity)
+    env = env(n_players=n_players, n_games=n_games, n_matchups=n_matchups, n_generations=n_generations,
+              memory_capacity=memory_capacity, strat_detector=strat_detector)
     env.run(verbose=verbose)
     env.evaluator.plot_fitness(max=True, min=True)
-    env.evaluator.plot_strategies(title=f'Strategies over generations, gen={n_generations}, players={n_players}')
+    if strat_detector:
+        env.evaluator.plot_strategies(title=f'Strategies over generations, gen={n_generations}, players={n_players}')
     
 
 

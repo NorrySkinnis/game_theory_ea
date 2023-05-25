@@ -1,14 +1,12 @@
 import numpy as np
 import torch
 import torch.nn as nn
-
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from constants import device, MAX_MEMORY_CAPACITY
 
 
 class Player:
     # Allows to have players with different memory capacities
-    max_memory_capacity = 5
+    max_memory_capacity = MAX_MEMORY_CAPACITY
     def __init__(self, identifier: int, n_matchups: int, n_games: int, memory_capacity=2):
         """
         Args:
