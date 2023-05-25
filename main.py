@@ -16,12 +16,13 @@ if __name__ == '__main__':
 
     # default values if not command line args are given
     n_games = 100
-    n_matchups = 10
-    n_generations = 20
+    n_matchups = 50
+    n_generations = 50
     n_players = 100  # at least 2
     memory_capacity = 1  # at least 1
     verbose = False
     strat_detector = True
+    use_cuda = False
 
     for i, arg in enumerate(sys.argv):
         if arg == '-players':
@@ -42,7 +43,7 @@ if __name__ == '__main__':
                 raise ValueError('Memory capacity must be at least 1')
             
     env = env(n_players=n_players, n_games=n_games, n_matchups=n_matchups, n_generations=n_generations,
-              memory_capacity=memory_capacity, strat_detector=strat_detector)
+              memory_capacity=memory_capacity, strat_detector=strat_detector, use_cuda=use_cuda)
     env.run(verbose=verbose)
     env.evaluator.plot_fitness(max=True, min=True)
     if strat_detector:

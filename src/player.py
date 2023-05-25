@@ -7,7 +7,7 @@ from constants import device, MAX_MEMORY_CAPACITY
 class Player:
     # Allows to have players with different memory capacities
     max_memory_capacity = MAX_MEMORY_CAPACITY
-    def __init__(self, identifier: int, n_matchups: int, n_games: int, memory_capacity=2):
+    def __init__(self, identifier: int, n_matchups: int, n_games: int, memory_capacity=2, use_cuda=False):
         """
         Args:
             identifier: unique identifier for player
@@ -21,6 +21,7 @@ class Player:
         self.brain = MLP(n_input=memory_capacity, n_hidden=4).to(device)
         self.n_matchups = n_matchups
         self.n_games = n_games
+        self.use_cuda = use_cuda
         self.action_history = -np.ones(shape=(n_matchups, n_games + Player.max_memory_capacity), dtype=int)
         self.reward = 0
         self.n_matchups_played = 0
@@ -39,7 +40,10 @@ class Player:
         Returns:
             actions: array of 0s and 1s, corresponding to cooperate or defect
         """
-        actions = self.brain.forward_non_cuda(history)
+        if self.use_cuda:
+            actions = self.brain(history)
+        else:
+            actions = self.brain.forward_non_cuda(history)
         return actions
     
     def reset(self):
