@@ -12,7 +12,7 @@ from tqdm import tqdm
 class Environment:
 
     def __init__(self, n_players: int, n_matchups: int, n_games: int, n_generations: int, memory_capacity: int,
-                 strat_detector=True, fitness=lambda x, t: np.power(0.99, t) * np.sum(x)):
+                 strat_detector=True, fitness=lambda x, t: np.power(0.99, t) * np.sum(x), use_cuda=False):
         """
         Args:
             n_players: number of players
@@ -27,13 +27,13 @@ class Environment:
         self.n_matchups = n_matchups
         self.n_games = n_games
         self.n_generations = n_generations
-        self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity)
-                        for i in range(n_players)]
+        self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity,
+                               use_cuda=use_cuda) for i in range(n_players)]
         self.strat_detector = strat_detector
         self.fitness = fitness 
         self.evaluator = Evaluator(players=self.players, n_generations=n_generations)
 
-    def run(self, verbose=False)->None:
+    def run(self, verbose=False) -> None:
         """ 
         Args:
             verbose: If True, prints information about the game
