@@ -58,6 +58,7 @@ class Evaluator:
         plt.xlabel('Generations')
         plt.ylabel('Relative strategy distribution (%)')  # make labels so it lines up with colour
         plt.legend([STRATS[k] for k in STRATS.keys()])
+        plt.xticks(np.arange(0, self.n_generations+self.n_generations//10, self.n_generations//10))
         plt.margins(x=0)
         plt.margins(y=0)
 
