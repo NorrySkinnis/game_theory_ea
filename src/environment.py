@@ -47,11 +47,11 @@ class Environment:
             for p in self.players:
                 # Ignore entries with -1, which means no matchup
                 opponent_ids = matchups[matchups[:, p.identifier] >= 0, p.identifier]
+                verdict = detect_strategy(player=p, verbose=verbose)
+                self.evaluator.update(player=p, nth_generation=gen_i, verdict=verdict)
                 if len(opponent_ids) == 0:
                     continue              
                 self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
-                verdict = detect_strategy(player=p, verbose=verbose)
-                self.evaluator.update(player=p, nth_generation=gen_i, verdict=verdict)
             self.evolve()
 
     def evolve(self) -> None:

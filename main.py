@@ -17,8 +17,8 @@ if __name__ == '__main__':
     # default values if not command line args are given
     n_games = 5
     n_matchups = 5
-    n_generations = 2
-    n_players = 2  # at least 2
+    n_generations = 10
+    n_players = 10  # at least 2
     verbose = True
     memory_capacity = 1
 
