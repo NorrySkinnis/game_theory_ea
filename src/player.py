@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from constants import device, MAX_MEMORY_CAPACITY
+import random
 
 
 class Player:
@@ -59,6 +60,24 @@ class Player:
         self.brain.W2_ += np.random.normal(loc=0, scale=1, size=self.brain.W2_.shape)
         self.brain.Wb1 += np.random.normal(loc=0, scale=1, size=self.brain.Wb1.shape)
         self.brain.Wb2 += np.random.normal(loc=0, scale=1, size=self.brain.Wb2.shape)
+
+    def crossover(self, other):
+        """Cross over genes of player with another
+
+        Args:
+            other (Player): player to cross over with
+        """
+        crossover_p = 0.1
+        # switch weight vectors randomly between 2 players
+        for i, row in enumerate(self.brain.W1_):
+            if random.random() < crossover_p:
+                temp = row
+                row = other.brain.W1_[i]
+                other.brain.W1_[i] = temp
+                
+        # for i, row in enumerate(self.brain.W2_)
+        # ...
+
 
 
 class MLP(nn.Module):

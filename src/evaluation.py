@@ -24,7 +24,7 @@ class Evaluator:
         self.strategy_data[nth_generation, player.identifier] = verdict
 
     def plot_fitness(self, max=True, min=True):
-        gens = np.arange(1, self.n_generations+1)
+        gens = np.arange(self.n_generations)
         if max:
             max_reward = np.max(self.rewards_per_gen, axis=0)
         if min:
@@ -42,11 +42,11 @@ class Evaluator:
         
         # plot max theoretical fitness
         betray_reward = np.max(self.payoff_matrix)
-        plt.hlines(y=betray_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations, linestyle = '--', color='gray')
+        plt.hlines(y=betray_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = '--', color='gray')
         legend.append('theoretical max')
         # plot all friends fitness threshold
         coop_reward = self.payoff_matrix[0][0][0]
-        plt.hlines(y=coop_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations, linestyle = '--', color='gray')
+        plt.hlines(y=coop_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = '-.', color='gray')
         legend.append('all C threshold')
         # make the plot nice
         plt.title('Fitness of players over time')

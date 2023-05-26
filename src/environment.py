@@ -91,6 +91,15 @@ class Environment:
         # Create new generation
         self.players[index:] = new_players
         # Reset player information and ids. Ids HAVE to be sorted ascending in new list
+
+        # crossover tryout code
+        combis = []
+        for _ in range(len(self.players)):
+            combis.append(random.sample(range(len(self.players)), 2))
+        for combo in combis:
+            self.players[combo[0]].crossover(self.players[combo[1]])
+            
+
         for i, p in enumerate(self.players):
             p.reset()
             p.identifier = i
