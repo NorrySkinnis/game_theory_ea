@@ -75,6 +75,7 @@ class MLP(nn.Module):
         self.W2 = nn.Linear(n_hidden, 1, bias=bias)
         self.relu = nn.ReLU()
 
+        # non cuda weights
         self.W1_ = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
         self.W2_ = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
         self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
