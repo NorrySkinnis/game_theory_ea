@@ -28,14 +28,21 @@ def print_weights(player, weights=True, bias=True):
 		print(player.brain.Wb2)
 
 
-bias = True
 verdicts = []
-for i in range(10):
+for i in range(1):
 	print("-" * 20)
 	print(f"Player {i}")
 	player = Player(identifier=0, n_matchups=10, n_games=10, memory_capacity=1, use_cuda=False)
-	reset_player(player, bias_reset=bias)
-	print_weights(player, weights=True, bias=bias)
+	reset_player(player, bias_reset=True)
+	# augment weights here ###
+
+	player.brain.W1_ = np.array([[0, 1, 0, 0]])
+	player.brain.W2_ = np.array([[0], [-1], [0], [0]])
+	# player.brain.Wb1 = np.array([[2.0, 2.0, 2.0, 2.0]])
+	player.brain.Wb2 = np.array([[0]])
+
+	####
+	print_weights(player, weights=True, bias=True)
 	verdict = detect_strategy(player=player, verbose=False)
 	verdicts.append(STRATS[verdict])
 	print("-" * 20)
