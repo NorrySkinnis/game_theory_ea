@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # default values if not command line args are given
     n_games = 100
     n_matchups = 50
-    n_generations = 50
+    n_generations = 200
     n_players = 100  # at least 2
     assert n_players > n_matchups
     memory_capacity = 3  # at least 1

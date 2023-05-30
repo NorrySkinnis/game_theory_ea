@@ -67,7 +67,7 @@ class Environment:
         generating their mutated offspring.
         """
         # Percentage of players that are kept for next generation: Elite
-        elite = 0.95
+        elite = 0.5
         index = int(elite * len(self.players))
         # Sort players in descending order. Elite is until index
         # Is it possible to integrate the player.reset() call in here?

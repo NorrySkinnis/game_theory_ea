@@ -29,8 +29,8 @@ class Player:
         self.initialize_action_history()
 
     @classmethod
-    def t4tplayer(cls, identifier: int, n_matchups: int, n_games: int, memory_capacity=2, use_cuda=False):
-        """hardcode a t4t player with memory 2. args are the same as __init__()
+    def t4tplayer(cls, identifier: int, n_matchups: int, n_games: int, memory_capacity=3, use_cuda=False):
+        """hardcode a t4t player with memory 3. args are the same as __init__()
 
         Args:
             identifier: unique identifier for player
