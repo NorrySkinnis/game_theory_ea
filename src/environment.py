@@ -31,7 +31,7 @@ class Environment:
                                use_cuda=use_cuda) for i in range(n_players)]
         self.strat_detector = strat_detector
         self.fitness = fitness 
-        self.evaluator = Evaluator(players=self.players, n_generations=n_generations)
+        self.evaluator = Evaluator(players=self.players, n_generations=n_generations, payoff_matrix=self.payoff_matrix, n_games=self.n_games, n_matchups = self.n_matchups)
 
     def run(self, verbose=False) -> None:
         """ 
@@ -68,11 +68,12 @@ class Environment:
         elite = 0.5
         index = int(elite * len(self.players))
         # Sort players in descending order. Elite is until index
-        # Is it possible to integrate the player.reset() call in here? 
+        # Is it possible to integrate the player.reset() call in here?
+        # I don't see why you would want this 
         self.players.sort(key=lambda x: x.reward, reverse=True)
         # Ids of players that do not belong to elite. To be given to new players in next generation
         available_ids = []
-        for i, p in enumerate(self.players[index:]):
+        for p in self.players[index:]:
             available_ids.append(p.identifier)
         # Generate new players using surviving parents
         new_players = []
@@ -89,7 +90,16 @@ class Environment:
             new_players.append(child)
         # Create new generation
         self.players[index:] = new_players
-        # Reset player information and ids
+        # Reset player information and ids. Ids HAVE to be sorted ascending in new list
+
+        # crossover tryout code
+        combis = []
+        for _ in range(len(self.players)):
+            combis.append(random.sample(range(len(self.players)), 2))
+        for combo in combis:
+            self.players[combo[0]].crossover(self.players[combo[1]])
+            
+
         for i, p in enumerate(self.players):
             p.reset()
             p.identifier = i

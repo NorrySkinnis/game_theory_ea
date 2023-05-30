@@ -7,12 +7,15 @@ from constants import STRATS
 
 class Evaluator:
 
-    def __init__(self, players:list[Player], n_generations:int):
+    def __init__(self, players:list[Player], n_generations:int, payoff_matrix, n_games:int, n_matchups:int):
         self.n_generations = n_generations
         self.players = players
         self.rewards_per_gen = np.zeros(shape=(len(players), n_generations))
         self.memory_capacities_per_gen = np.zeros(shape=(len(players), n_generations))
         self.strategy_data = np.empty(shape=(self.n_generations, len(players)))
+        self.payoff_matrix = payoff_matrix
+        self.n_games = n_games
+        self.n_matchups = n_matchups
 
     def update(self, player:Player, nth_generation:int, verdict:int)->None:
         """Trigger snapshot of players' rewards and memory capacities at nth generation.""" 
@@ -21,16 +24,35 @@ class Evaluator:
         self.strategy_data[nth_generation, player.identifier] = verdict
 
     def plot_fitness(self, max=True, min=True):
-        gens = np.arange(1, self.n_generations+1)
+        gens = np.arange(self.n_generations)
         if max:
             max_reward = np.max(self.rewards_per_gen, axis=0)
         if min:
             min_reward = np.min(self.rewards_per_gen, axis=0)
         mean_reward = np.mean(self.rewards_per_gen, axis=0)
-        plt.plot(gens, mean_reward, label='Avg')
-        plt.plot(gens, max_reward, label='Max')
-        plt.plot(gens, min_reward, label='Min')
-        plt.legend()
+
+        legend = []
+        # plot min, max, avg of fitness
+        plt.plot(gens, max_reward, label='Max', c = 'm')
+        legend.append('max')
+        plt.plot(gens, mean_reward, label='Avg', c='r')
+        legend.append('avg')
+        plt.plot(gens, min_reward, label='Min', c = 'm')
+        legend.append('min')
+        
+        # plot max theoretical fitness
+        betray_reward = np.max(self.payoff_matrix)
+        plt.hlines(y=betray_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = '--', color='gray')
+        legend.append('theoretical max')
+        # plot all friends fitness threshold
+        coop_reward = self.payoff_matrix[0][0][0]
+        plt.hlines(y=coop_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = '-.', color='gray')
+        legend.append('all C threshold')
+        # make the plot nice
+        plt.title('Fitness of players over time')
+        plt.xlabel('generation')
+        plt.ylabel('fitness')
+        plt.legend(legend)
         plt.show()
 
     def plot_strategies(self, name=None, title='', save=True):
