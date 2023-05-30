@@ -120,6 +120,16 @@ def detect_strategy(player, games=20, verbose=False):
 	detector = StrategyDetector(games=games)
 
 	verdict = detector.detect(player=player)
+
+	# grabbing a t4t player code ---
+	# if verdict == 0:
+	# 	print(player.brain.W1_.tolist())
+	# 	print(player.brain.W2_.tolist())
+	# 	print(player.brain.Wb1.tolist())
+	# 	print(player.brain.Wb2.tolist())
+	# 	print("---")
+	# --- end of t4t code
+
 	if verbose:
 		print(f"Player {player.identifier} is seen as: {STRATS[verdict]}")
 	return verdict

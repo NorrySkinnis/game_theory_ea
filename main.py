@@ -19,7 +19,8 @@ if __name__ == '__main__':
     n_matchups = 50
     n_generations = 50
     n_players = 100  # at least 2
-    memory_capacity = 1  # at least 1
+    assert n_players > n_matchups
+    memory_capacity = 3  # at least 1
     verbose = False
     strat_detector = True
     use_cuda = False

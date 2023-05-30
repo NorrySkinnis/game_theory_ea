@@ -27,7 +27,9 @@ class Environment:
         self.n_matchups = n_matchups
         self.n_games = n_games
         self.n_generations = n_generations
-        self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity,
+        # self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity,
+        #                        use_cuda=use_cuda) for i in range(n_players)]
+        self.players = [Player.t4tplayer(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity,
                                use_cuda=use_cuda) for i in range(n_players)]
         self.strat_detector = strat_detector
         self.fitness = fitness 
@@ -65,7 +67,7 @@ class Environment:
         generating their mutated offspring.
         """
         # Percentage of players that are kept for next generation: Elite
-        elite = 0.5
+        elite = 0.95
         index = int(elite * len(self.players))
         # Sort players in descending order. Elite is until index
         # Is it possible to integrate the player.reset() call in here?
@@ -93,11 +95,11 @@ class Environment:
         # Reset player information and ids. Ids HAVE to be sorted ascending in new list
 
         # crossover tryout code
-        combis = []
-        for _ in range(len(self.players)):
-            combis.append(random.sample(range(len(self.players)), 2))
-        for combo in combis:
-            self.players[combo[0]].crossover(self.players[combo[1]])
+        # combis = []
+        # for _ in range(len(self.players)):
+        #     combis.append(random.sample(range(len(self.players)), 2))
+        # for combo in combis:
+        #     self.players[combo[0]].crossover(self.players[combo[1]])
             
 
         for i, p in enumerate(self.players):
