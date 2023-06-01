@@ -1,5 +1,5 @@
 import numpy as np
-
+from collections import Counter
 from player import Player
 from strategy_detector import detect_strategy
 from constants import STRATS
@@ -31,10 +31,12 @@ def print_weights(player, weights=True, bias=True):
 
 verdicts = []
 save = True
+verbose = True
 players = 1000
 for i in range(players):
-	print("-" * 20)
-	print(f"Player {i}")
+	if verbose:
+		print("-" * 20)
+		print(f"Player {i}")
 	player = Player(identifier=0, n_matchups=10, n_games=10, memory_capacity=1, use_cuda=False)
 	# reset_player(player, bias_reset=True)
 	# augment weights here ###
@@ -48,9 +50,21 @@ for i in range(players):
 	print_weights(player, weights=True, bias=True)
 	verdict = detect_strategy(player=player, verbose=False)
 	verdicts.append(STRATS[verdict])
-	print("-" * 20)
+	if verbose:
+		print("-" * 20)
 
-print(verdicts)
+if verbose:
+	print(verdicts)
+c = Counter(verdicts)
+
+percentages = {}
+for key, value in c.items():
+	percentage = value/players
+	percentages[key] = percentage
+
+if verbose:
+	print(percentages)
+
 plt.hist(verdicts)
 plt.title(f"Histogram of distribution for {players} players")
 plt.xlabel("Strategy")
