@@ -1,7 +1,5 @@
 import numpy as np
-import torch
-import torch.nn as nn
-from constants import device, MAX_MEMORY_CAPACITY
+from constants import MAX_MEMORY_CAPACITY
 import random
 
 
@@ -19,7 +17,7 @@ class Player:
         self.identifier = identifier
         # Has to be smaller than max memory capacity
         self.memory_capacity = memory_capacity if memory_capacity <= Player.max_memory_capacity else Player.max_memory_capacity
-        self.brain = MLP(n_input=memory_capacity, n_hidden=4).to(device)
+        self.brain = MLP(n_input=memory_capacity, n_hidden=4)
         self.n_matchups = n_matchups
         self.n_games = n_games
         self.action_history = -np.ones(shape=(n_matchups, n_games + Player.max_memory_capacity), dtype=int)
