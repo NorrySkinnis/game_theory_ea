@@ -41,10 +41,7 @@ class Player:
         Returns:
             actions: array of 0s and 1s, corresponding to cooperate or defect
         """
-        if self.use_cuda:
-            actions = self.brain(history)
-        else:
-            actions = self.brain.forward_non_cuda(history)
+        actions = self.brain.forward(history)
         return actions
     
     def reset(self):
