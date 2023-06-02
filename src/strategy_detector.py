@@ -7,50 +7,47 @@ class StrategyDetector:
 	def __init__(self, games=20):
 		self.games = games
 		# 0 is cooperate, 1 is defect
-		self.detection_strategy = np.concatenate((np.zeros(self.games//2), np.ones(self.games//2)))
+		self.strategy = np.concatenate((np.zeros(self.games//2), np.ones(self.games//2)))
 		self.change = games//2
-		self.action_history = []  # gets initialised and modified in detect function
+		self.player_action_history = None
 
 	def detect(self, player):
 		"""Runs a few games to detect the strategy of a player"""
-		# player.reset()
-		# prepare action history based on memory capacity of opponent
-		self.action_history = -np.ones(shape=(1, self.games + player.memory_capacity), dtype=int)
-		pre_cooperate = np.zeros(shape=(1, player.memory_capacity))
-		self.action_history[:, :player.memory_capacity] = pre_cooperate  # prepends actions to history
+		# Get player's memory capacity
+		memory_capacity = player.memory_capacity
+		# Initialize opponent history
+		self.player_action_history = []
+		# Initialize detector action history with n memory_capacity moves
+		action_history = np.hstack((np.zeros(memory_capacity), self.strategy)) 
+		# Play n games with player 
+		for game_i in range(self.games):
+			upper = memory_capacity + game_i
+			lower = upper - memory_capacity
+			history = action_history[lower:upper]
+			player_action = player.act(history)
+			self.player_action_history.append(player_action)
+		# Analyze player strategy
+		detected_strategy = self.analyze_player_history()
+		return detected_strategy
 
-		opponent_history = []
-		for g in range(self.games):
-			my_action = self.detection_strategy[g]
-			upper = player.memory_capacity + g
-			lower = upper - player.memory_capacity
-			self.action_history[:, upper] = my_action
-			history = self.action_history[:, lower:upper]
-			opponent_history.append(player.act(history))
-
-		verdict = self.analyze_history(opponent_history)
-		self.action_history = []
-		return verdict
-
-	def analyze_history(self, opponent_history):
+	def analyze_player_history(self):
+		action_history = self.player_action_history
 		# Hawk
-		if ACTIONS['C'] not in opponent_history:
+		if ACTIONS['C'] not in action_history:
 			return 2  # Hawk
 		# Dove
-		elif ACTIONS['D'] not in opponent_history:
+		elif ACTIONS['D'] not in action_history:
 			return 1  # Dove
 		# tit for tat
-		if opponent_history[self.change] == ACTIONS['C'] and ACTIONS['D'] not in \
-				opponent_history[:self.change] and ACTIONS['C'] not in opponent_history[self.change + 1:]:
+		if action_history[self.change] == ACTIONS['C'] and ACTIONS['D'] not in \
+				action_history[:self.change] and ACTIONS['C'] not in action_history[self.change + 1:]:
 			return 0  # TitForTat
 		# else random
 		return 3  # Random/Undetermined
 
-
 """
 Manual strategies for testing the StrategyDetector
 """
-
 
 class PlayerStrategy:
 	"""
