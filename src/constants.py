@@ -4,7 +4,8 @@ STRATS = {
 			0: 'TitForTat',
 			1: "Dove",
 			2: "Hawk",
-			3: "Random/Undetermined"
+			3: "Random/Undetermined",
+            4: "GrimTrigger"
 		}
 
 ACTIONS = {"C": 0, "D": 1}

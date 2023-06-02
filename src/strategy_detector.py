@@ -94,6 +94,23 @@ class Hawk(PlayerStrategy):
 	def act(self, history):
 		self.action_history.append(ACTIONS["D"])
 		return ACTIONS["D"]
+	
+
+class GrimTrigger(PlayerStrategy):
+	def __init__(self_):
+		super().__init__("GrimTrigger")
+
+	def act(self, history):
+		if len(history) == 0:
+			self.action_history.append(ACTIONS["C"])
+			return ACTIONS["C"]  # cooperate
+		elif 1 in history:
+			self.action_history.append(ACTIONS["D"])
+			return ACTIONS["D"]	# defect
+		else:
+			self.action_history.append(ACTIONS["C"])
+			return ACTIONS["C"]  # cooperate
+
 
 
 class Random(PlayerStrategy):
