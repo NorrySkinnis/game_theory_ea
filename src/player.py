@@ -50,8 +50,8 @@ class Player:
 
     def mutate(self):
         """Mutate neuron connections of brain"""
-        self.brain.W1_ += np.random.normal(loc=0, scale=1, size=self.brain.W1_.shape)
-        self.brain.W2_ += np.random.normal(loc=0, scale=1, size=self.brain.W2_.shape)
+        self.brain.W1 += np.random.normal(loc=0, scale=1, size=self.brain.W1.shape)
+        self.brain.W2 += np.random.normal(loc=0, scale=1, size=self.brain.W2.shape)
         self.brain.Wb1 += np.random.normal(loc=0, scale=1, size=self.brain.Wb1.shape)
         self.brain.Wb2 += np.random.normal(loc=0, scale=1, size=self.brain.Wb2.shape)
 
@@ -63,18 +63,18 @@ class Player:
         """
         crossover_p = 0.1
         # switch weight vectors randomly between 2 players
-        for i, row in enumerate(self.brain.W1_):
+        for i, row in enumerate(self.brain.W1):
             if random.random() < crossover_p:
                 temp = row
-                row = other.brain.W1_[i]
-                other.brain.W1_[i] = temp
+                row = other.brain.W1[i]
+                other.brain.W1[i] = temp
                 
         # for i, row in enumerate(self.brain.W2_)
         # ...
 
-class MLP(nn.Module):
+class MLP():
     """Creates a multi-layer perceptron with a single hidden layer."""
-    def __init__(self, n_input, n_hidden, bias=True):
+    def __init__(self, n_input, n_hidden):
         """
         Args:
             n_input: number of actions observed by player
