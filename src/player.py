@@ -175,6 +175,7 @@ class MLP:
             output = self.h[:,1] @ self.W2 + self.Wb2
             output = np.array(output >= 0, dtype=bool) * 1
             output = np.reshape(output, (output.shape[0],))
+            self.h[:,0] = self.h[:,1]
             return output
 
           
