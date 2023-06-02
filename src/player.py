@@ -2,7 +2,6 @@ import numpy as np
 from constants import MAX_MEMORY_CAPACITY
 import random
 
-
 class Player:
     # Allows to have players with different memory capacities
     max_memory_capacity = MAX_MEMORY_CAPACITY
@@ -79,8 +78,8 @@ class Player:
 
         loc = 0
         scale = 0.5
-        self.brain.W1_ += np.random.normal(loc, scale, size=self.brain.W1_.shape)
-        self.brain.W2_ += np.random.normal(loc, scale, size=self.brain.W2_.shape)
+        self.brain.W1 += np.random.normal(loc, scale, size=self.brain.W1.shape)
+        self.brain.W2 += np.random.normal(loc, scale, size=self.brain.W2.shape)
         self.brain.Wb1 += np.random.normal(loc, scale, size=self.brain.Wb1.shape)
         self.brain.Wb2 += np.random.normal(loc, scale, size=self.brain.Wb2.shape)
 
@@ -94,21 +93,21 @@ class Player:
         crossover_p = 0.1
         # switch weight vectors randomly between 2 players
 
-        for i, col in enumerate(self.brain.W1_[0]):
+        for i, col in enumerate(self.brain.W1[0]):
             if random.random() < crossover_p:
-                temp = self.brain.W1_[:,i]
-                self.brain.W1_[:,i] = other.brain.W1_[:,i]
-                other.brain.W1_[:,i] = temp
-        for i, col in enumerate(self.brain.W2_[0]):
+                temp = self.brain.W1[:,i]
+                self.brain.W1[:,i] = other.brain.W1[:,i]
+                other.brain.W1[:,i] = temp
+        for i, col in enumerate(self.brain.W2[0]):
             if random.random() < crossover_p:
-                temp = self.brain.W2_[:,i]
-                self.brain.W2_[:,i] = other.brain.W2_[:,i]
-                other.brain.W2_[:,i] = temp
+                temp = self.brain.W2[:,i]
+                self.brain.W2[:,i] = other.brain.W2[:,i]
+                other.brain.W2[:,i] = temp
         for i, col in enumerate(self.brain.Wb1[0]):
             if random.random() < crossover_p:
                 temp = self.brain.Wb1[:,i]
-                self.brain.Wb1_[:,i] = other.brain.W1_[:,i]
-                other.brain.Wb1_[:,i] = temp
+                self.brain.Wb1[:,i] = other.brain.Wb1[:,i]
+                other.brain.Wb1[:,i] = temp
         for i, col in enumerate(self.brain.Wb2[0]):
             if random.random() < crossover_p:
                 temp = self.brain.Wb2[:,i]
@@ -119,7 +118,7 @@ class Player:
         # for i, row in enumerate(self.brain.W2_)
         # ...
 
-class MLP():
+class MLP:
     """Creates a multi-layer perceptron with a single hidden layer."""
     def __init__(self, n_input, n_hidden):
         """
@@ -128,10 +127,10 @@ class MLP():
             n_hidden: number of hidden units in the hidden layer
             bias: (optional) whether to include bias in linear layers
         """
-        self.W1 = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
-        self.W2 = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
-        self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
-        self.Wb2 = np.random.normal(loc=0, scale=2, size=(1, 1))
+        self.W1 = np.random.normal(loc=0, scale=1, size=(n_input, n_hidden))
+        self.W2 = np.random.normal(loc=0, scale=1, size=(n_hidden, 1))
+        self.Wb1 = np.random.normal(loc=0, scale=1, size=(1, n_hidden))
+        self.Wb2 = np.random.normal(loc=0, scale=1, size=(1, 1))
         self.f1 = lambda x: np.maximum(0, x)  
 
     def forward(self, X: np.ndarray) -> np.ndarray:
@@ -146,5 +145,36 @@ class MLP():
         output = np.array(output >= 0, dtype=bool) * 1
         output = np.reshape(output, (output.shape[0],))
         return output
+    
+    class RMLP:
+        """Creates a recurrent multi-layer perceptron with a single hidden layer."""
+        def __init__(self, n_input, n_hidden):
+            """
+            Args:
+                n_input: number of actions observed by player
+                n_hidden: number of hidden units in the hidden layer
+                bias: (optional) whether to include bias in linear layers
+            """
+            self.W1 = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
+            self.W2 = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
+            self.Wh = np.random.normal(loc=0, scale=2, size=(n_hidden, n_hidden))
+            self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
+            self.Wb2 = np.random.normal(loc=0, scale=2, size=(1, 1))
+            self.h = np.random.normal(loc=0, scale=2, size=(n_hidden, 2))
+            self.f1 = lambda x: np.maximum(0, x)  
+
+        def forward(self, X: np.ndarray) -> np.ndarray:
+            """ Args:
+                X: input matrix of shape (n, m), where n is the number of opponents 
+                   and m is the number of actions observed 
+
+                Returns:
+                output: output matrix of shape (n, 1), one action for each opponent
+                """ 
+            self.h[:,1] = self.f1(X @ self.W1 + self.h[:,0] @ self.Wh + self.Wb1)
+            output = self.h[:,1] @ self.W2 + self.Wb2
+            output = np.array(output >= 0, dtype=bool) * 1
+            output = np.reshape(output, (output.shape[0],))
+            return output
 
           
