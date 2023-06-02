@@ -78,8 +78,6 @@ class Player:
         # for i, row in enumerate(self.brain.W2_)
         # ...
 
-
-
 class MLP(nn.Module):
     """Creates a multi-layer perceptron with a single hidden layer."""
     def __init__(self, n_input, n_hidden, bias=True):
@@ -89,34 +87,13 @@ class MLP(nn.Module):
             n_hidden: number of hidden units in the hidden layer
             bias: (optional) whether to include bias in linear layers
         """
-        super(MLP, self).__init__()
-        self.W1 = nn.Linear(n_input, n_hidden, bias=bias)
-        self.W2 = nn.Linear(n_hidden, 1, bias=bias)
-        self.relu = nn.ReLU()
-
-        self.W1_ = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
-        self.W2_ = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
+        self.W1 = np.random.normal(loc=0, scale=2, size=(n_input, n_hidden))
+        self.W2 = np.random.normal(loc=0, scale=2, size=(n_hidden, 1))
         self.Wb1 = np.random.normal(loc=0, scale=2, size=(1, n_hidden))
         self.Wb2 = np.random.normal(loc=0, scale=2, size=(1, 1))
-        self.f1 = lambda x: np.maximum(0, x)  # manual ReLU activation function
+        self.f1 = lambda x: np.maximum(0, x)  
 
     def forward(self, X: np.ndarray) -> np.ndarray:
-        """
-        Args:
-            X: input matrix of shape (n, m), where n is the number of opponents 
-               and m is the number of actions observed 
-
-            Returns:
-            output: output matrix of shape (n, 1), one action for each opponent
-        """
-        X = torch.tensor(X, dtype=torch.float32).to(device)
-        y = self.W1(X)
-        y = self.relu(self.W2(y))
-        out = y.detach().cpu().numpy()
-        out = np.array(out >= 0, dtype=np.int32).reshape(out.shape[0],)
-        return out
-
-    def forward_non_cuda(self, X: np.ndarray) -> np.ndarray:
         """ Args:
             X: input matrix of shape (n, m), where n is the number of opponents 
                and m is the number of actions observed 
@@ -124,7 +101,7 @@ class MLP(nn.Module):
             Returns:
             output: output matrix of shape (n, 1), one action for each opponent
             """ 
-        output = self.f1(X @ self.W1_ + self.Wb1) @ self.W2_ + self.Wb2
+        output = self.f1(X @ self.W1 + self.Wb1) @ self.W2 + self.Wb2
         output = np.array(output >= 0, dtype=bool) * 1
         output = np.reshape(output, (output.shape[0],))
         return output
