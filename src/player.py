@@ -24,6 +24,32 @@ class Player:
         self.reward = 0
         self.n_matchups_played = 0
         self.initialize_action_history()
+
+    @classmethod
+    def t4tplayer(cls, identifier: int, n_matchups: int, n_games: int, memory_capacity=3, use_cuda=False):
+        """hardcode a t4t player with memory 3. args are the same as __init__()
+
+        Args:
+            identifier: unique identifier for player
+            n_matchups: number of matchups per generation
+            n_games: number of games per matchup
+            memory_capacity: (optional) number of previous actions to consider when making a decision
+        """
+        Player = cls(identifier, n_matchups, n_games, memory_capacity, use_cuda)
+        # capacity = 3
+        # Player.brain.W1_ = np.array([[-0.03709999634875267, -1.7961602824118976, -1.8527891849240585, -0.36712396749863263], [1.0231250035826696, -1.9575437119800085, 0.19572761446875336, 2.240618403104051], [3.1467075480031617, 2.268071929050388, -2.070629723532281, 1.2688080835096178]])
+        # Player.brain.W2_ = np.array([[4.053400565815565], [1.8971396987502256], [-0.7128677902049138], [-0.869760297130533]])
+        # Player.brain.Wb1 = np.array([[0.20788300846405733, -1.102598967259388, -0.4842573079389737, 0.9118712326838753]])
+        # Player.brain.Wb2 = np.array([[-3.9004539936852285]])
+
+        # capacity = 1
+        Player.brain.W1_ = np.array([[-3.3558280112521226, 1.3545721381177211, 0.08247490964425366, 0.2547275421203078]])
+        Player.brain.W2_ = np.array([[-1.6306096105362322], [3.8493623418727454], [0.2581273899162175], [2.6713216828002047]])
+        Player.brain.Wb1 = np.array([[2.6942157638088875, 0.576930698019904, -2.1350991199552376, 0.05426302095116809]])
+        Player.brain.Wb2 = np.array([[-0.2280021211335938]])
+        
+        return Player
+
     
     def initialize_action_history(self)->None:
         """Initializes first max_memory_capacity actions for all matchups with zeros."""
@@ -50,10 +76,14 @@ class Player:
 
     def mutate(self):
         """Mutate neuron connections of brain"""
-        self.brain.W1 += np.random.normal(loc=0, scale=1, size=self.brain.W1.shape)
-        self.brain.W2 += np.random.normal(loc=0, scale=1, size=self.brain.W2.shape)
-        self.brain.Wb1 += np.random.normal(loc=0, scale=1, size=self.brain.Wb1.shape)
-        self.brain.Wb2 += np.random.normal(loc=0, scale=1, size=self.brain.Wb2.shape)
+
+        loc = 0
+        scale = 0.5
+        self.brain.W1_ += np.random.normal(loc, scale, size=self.brain.W1_.shape)
+        self.brain.W2_ += np.random.normal(loc, scale, size=self.brain.W2_.shape)
+        self.brain.Wb1 += np.random.normal(loc, scale, size=self.brain.Wb1.shape)
+        self.brain.Wb2 += np.random.normal(loc, scale, size=self.brain.Wb2.shape)
+
 
     def crossover(self, other):
         """Cross over genes of player with another
@@ -63,11 +93,28 @@ class Player:
         """
         crossover_p = 0.1
         # switch weight vectors randomly between 2 players
-        for i, row in enumerate(self.brain.W1):
+
+        for i, col in enumerate(self.brain.W1_[0]):
             if random.random() < crossover_p:
-                temp = row
-                row = other.brain.W1[i]
-                other.brain.W1[i] = temp
+                temp = self.brain.W1_[:,i]
+                self.brain.W1_[:,i] = other.brain.W1_[:,i]
+                other.brain.W1_[:,i] = temp
+        for i, col in enumerate(self.brain.W2_[0]):
+            if random.random() < crossover_p:
+                temp = self.brain.W2_[:,i]
+                self.brain.W2_[:,i] = other.brain.W2_[:,i]
+                other.brain.W2_[:,i] = temp
+        for i, col in enumerate(self.brain.Wb1[0]):
+            if random.random() < crossover_p:
+                temp = self.brain.Wb1[:,i]
+                self.brain.Wb1_[:,i] = other.brain.W1_[:,i]
+                other.brain.Wb1_[:,i] = temp
+        for i, col in enumerate(self.brain.Wb2[0]):
+            if random.random() < crossover_p:
+                temp = self.brain.Wb2[:,i]
+                self.brain.Wb2[:,i] = other.brain.Wb2[:,i]
+                other.brain.Wb2[:,i] = temp
+
                 
         # for i, row in enumerate(self.brain.W2_)
         # ...
