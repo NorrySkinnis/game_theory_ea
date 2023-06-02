@@ -39,10 +39,18 @@ class Player:
             memory_capacity: (optional) number of previous actions to consider when making a decision
         """
         Player = cls(identifier, n_matchups, n_games, memory_capacity, use_cuda)
-        Player.brain.W1_ = np.array([[-0.03709999634875267, -1.7961602824118976, -1.8527891849240585, -0.36712396749863263], [1.0231250035826696, -1.9575437119800085, 0.19572761446875336, 2.240618403104051], [3.1467075480031617, 2.268071929050388, -2.070629723532281, 1.2688080835096178]])
-        Player.brain.W2_ = np.array([[4.053400565815565], [1.8971396987502256], [-0.7128677902049138], [-0.869760297130533]])
-        Player.brain.Wb1 = np.array([[0.20788300846405733, -1.102598967259388, -0.4842573079389737, 0.9118712326838753]])
-        Player.brain.Wb2 = np.array([[-3.9004539936852285]])
+        # capacity = 3
+        # Player.brain.W1_ = np.array([[-0.03709999634875267, -1.7961602824118976, -1.8527891849240585, -0.36712396749863263], [1.0231250035826696, -1.9575437119800085, 0.19572761446875336, 2.240618403104051], [3.1467075480031617, 2.268071929050388, -2.070629723532281, 1.2688080835096178]])
+        # Player.brain.W2_ = np.array([[4.053400565815565], [1.8971396987502256], [-0.7128677902049138], [-0.869760297130533]])
+        # Player.brain.Wb1 = np.array([[0.20788300846405733, -1.102598967259388, -0.4842573079389737, 0.9118712326838753]])
+        # Player.brain.Wb2 = np.array([[-3.9004539936852285]])
+
+        # capacity = 1
+        Player.brain.W1_ = np.array([[-3.3558280112521226, 1.3545721381177211, 0.08247490964425366, 0.2547275421203078]])
+        Player.brain.W2_ = np.array([[-1.6306096105362322], [3.8493623418727454], [0.2581273899162175], [2.6713216828002047]])
+        Player.brain.Wb1 = np.array([[2.6942157638088875, 0.576930698019904, -2.1350991199552376, 0.05426302095116809]])
+        Player.brain.Wb2 = np.array([[-0.2280021211335938]])
+        
         return Player
 
     
@@ -74,10 +82,12 @@ class Player:
 
     def mutate(self):
         """Mutate neuron connections of brain"""
-        self.brain.W1_ += np.random.normal(loc=0, scale=1, size=self.brain.W1_.shape)
-        self.brain.W2_ += np.random.normal(loc=0, scale=1, size=self.brain.W2_.shape)
-        self.brain.Wb1 += np.random.normal(loc=0, scale=1, size=self.brain.Wb1.shape)
-        self.brain.Wb2 += np.random.normal(loc=0, scale=1, size=self.brain.Wb2.shape)
+        loc = 0
+        scale = 0.5
+        self.brain.W1_ += np.random.normal(loc, scale, size=self.brain.W1_.shape)
+        self.brain.W2_ += np.random.normal(loc, scale, size=self.brain.W2_.shape)
+        self.brain.Wb1 += np.random.normal(loc, scale, size=self.brain.Wb1.shape)
+        self.brain.Wb2 += np.random.normal(loc, scale, size=self.brain.Wb2.shape)
 
     def crossover(self, other):
         """Cross over genes of player with another

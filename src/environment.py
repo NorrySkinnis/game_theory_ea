@@ -12,7 +12,7 @@ from tqdm import tqdm
 class Environment:
 
     def __init__(self, n_players: int, n_matchups: int, n_games: int, n_generations: int, memory_capacity: int,
-                 strat_detector=True, fitness=lambda x, t: np.power(0.99, t) * np.sum(x), use_cuda=False):
+                 strat_detector=True, fitness=lambda x, t: np.power(1, t) * np.sum(x), use_cuda=False):
         """
         Args:
             n_players: number of players
@@ -27,10 +27,10 @@ class Environment:
         self.n_matchups = n_matchups
         self.n_games = n_games
         self.n_generations = n_generations
-        # self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity,
-        #                        use_cuda=use_cuda) for i in range(n_players)]
-        self.players = [Player.t4tplayer(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity,
+        self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity,
                                use_cuda=use_cuda) for i in range(n_players)]
+        # self.players = [Player.t4tplayer(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity,
+        #                        use_cuda=use_cuda) for i in range(n_players)]
         self.strat_detector = strat_detector
         self.fitness = fitness 
         self.evaluator = Evaluator(players=self.players, n_generations=n_generations, payoff_matrix=self.payoff_matrix, n_games=self.n_games, n_matchups = self.n_matchups)
@@ -74,6 +74,10 @@ class Environment:
         # I don't see why you would want this 
         self.players.sort(key=lambda x: x.reward, reverse=True)
         # Ids of players that do not belong to elite. To be given to new players in next generation
+        # for player in self.players:
+        #     print(detect_strategy(player))
+        #     print(player.reward)
+        # print('-------')
         available_ids = []
         for p in self.players[index:]:
             available_ids.append(p.identifier)
@@ -105,6 +109,11 @@ class Environment:
         for i, p in enumerate(self.players):
             p.reset()
             p.identifier = i
+
+        # for player in self.players:
+        #     print(detect_strategy(player))
+        # print('--------')
+        # print('--------')
     
     def sample_matchups(self) -> np.ndarray:
         """ Samples matchups for each player. Currently, with replacement."""
@@ -173,7 +182,7 @@ class Environment:
                 # (memory capacity - # games played) random moves + (# games played) moves of current player 
                 upper = max_memory_capacity + game_i
                 lower = upper - opponent.memory_capacity
-                history = player.action_history[i + nth_player_matchup - 1, lower:upper]
+                history = player.action_history[i + nth_player_matchup, lower:upper]
                 action = opponent.act(history)
                 
                 if verbose:
@@ -200,7 +209,8 @@ class Environment:
             player.action_history[nth_player_matchup:nth_player_matchup + n, upper] = player_actions
             # Determine rewards for player and opponents
             nth_player_matchup = player.n_matchups_played
-            rewards = self.payoff_matrix[player.action_history[nth_player_matchup,upper], opponent_actions[:,upper]] 
+            rewards = self.payoff_matrix[player_actions, opponent_actions[:,upper]]
+            # print(player.action_history[nth_player_matchup,upper]) 
 
             if verbose:
                 print(f'>> Rewards: Opponents: {rewards[:,1]}, Player: {rewards[:,0]}')
