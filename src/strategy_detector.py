@@ -1,137 +1,91 @@
 import numpy as np
 from player import Player
-from constants import ACTIONS, STRATS
+from constants import STRATEGY_CODES, MAX_MEMORY_CAPACITY
+from itertools import product
 
 
 class StrategyDetector:
-	def __init__(self, games=20):
-		self.games = games
-		# 0 is cooperate, 1 is defect
-		self.strategy = np.concatenate((np.zeros(self.games//2), np.ones(self.games//2)))
-		self.change = games//2
-		self.player_action_history = None
+	"""Creates a detector that can determine the current player's strategy.
+	
+	Given the memory capacity of the current player, the detector constructs an array
+	containg all possible inputs. 
+	
+	Using these inputs, player actions are derived for each of them.
+	This will create a unique mapping that is the transformed into a unique code.
+	
+	This code can be linked to a strategy.
+	
+	Example: 
+	--------
+	Memory capacity = 1: 0 -> C, 1 -> D
 
-	def detect(self, player):
-		"""Runs a few games to detect the strategy of a player"""
+	Possible inputs: [0], [1]
+	
+	Detector strategy: [[0], [1]]
+	
+	Possible player codes: [0, 0], [0, 1], [1, 0], [1, 1]
+	
+	Transformed player codes: {}, {1}, {0}, {0, 1}
+	"""
+	def __init__(self):
+		self.player_strategy_code = None
+		self.strategy = self.set_strategy()
+
+	def set_strategy(self)->dict[int, np.ndarray]:
+		"""Constructs a dictionary of all possible input combinations for each memory capacity.
+		
+		Returns:
+		--------
+		strategy: (dict[int, np.ndarray])
+			Dictionary of all possible input combinations for each memory capacity.
+		"""
+		keys = [c for c in range(1, MAX_MEMORY_CAPACITY+1)]
+		permutations = {key: None for key in keys}
+		for c in range(1,MAX_MEMORY_CAPACITY+1):
+			permutations[c] = np.array(list(product([0,1], repeat=c)))
+		return permutations
+
+	def detect_strategy(self, player:Player)->int:
+		"""Detector plays all possible input combination for the current player.
+		
+		Constructs unique code from the inputs for which the player defected.
+		Denoted by the index of the input combination in the strategy dictionary.
+			
+		Parameters:
+		----------
+		player: (Player)
+			Player whose strategy is to be detected.	
+		"""
 		# Get player's memory capacity
 		memory_capacity = player.memory_capacity
-		# Initialize opponent history
-		self.player_action_history = []
-		# Initialize detector action history with n memory_capacity moves
-		action_history = np.hstack((np.zeros(memory_capacity), self.strategy)) 
-		# Play n games with player 
-		for game_i in range(self.games):
-			upper = memory_capacity + game_i
-			lower = upper - memory_capacity
-			history = action_history[lower:upper]
+		# Get detector strategy for player's memory capacity
+		strategy = self.strategy[memory_capacity]
+		# initialize the strategy code for player
+		player_code = set()
+		# Play all possible input combinations
+		for i, history in enumerate(strategy):
 			player_action = player.act(history)
-			self.player_action_history.append(player_action)
-		# Analyze player strategy
-		detected_strategy = self.analyze_player_history()
-		return detected_strategy
+			# If player defected, add index of input comination to player_code
+			if player_action == 1:
+				player_code.add(i)
+		# Save player_code
+		self.player_strategy_code = player_code
+		# Determine player strategy from player code
+		player_strategy = self.analyze_player_history(memory_capacity=memory_capacity)
+		return player_strategy
 
-	def analyze_player_history(self):
-		action_history = self.player_action_history
-		# Hawk
-		if ACTIONS['C'] not in action_history:
-			return 2  # Hawk
-		# Dove
-		elif ACTIONS['D'] not in action_history:
-			return 1  # Dove
-		# tit for tat
-		if action_history[self.change] == ACTIONS['C'] and ACTIONS['D'] not in \
-				action_history[:self.change] and ACTIONS['C'] not in action_history[self.change + 1:]:
-			return 0  # TitForTat
-		# else random
-		return 3  # Random/Undetermined
-
-"""
-Manual strategies for testing the StrategyDetector
-"""
-
-class PlayerStrategy:
-	"""
-	Abstract class for a player strategy
-	"""
-	def __init__(self, name):
-		self.identifier = name
-		self.action_history = []
-		self.memory_capacity = 1
-
-	def act(self, opponent):
-		pass
-
-	def reset(self):
-		self.action_history = []
-
-
-class TitForTat(PlayerStrategy):
-	def __init__(self):
-		super().__init__("TitForTat")
-
-	def act(self, history):
-		if len(history) == 0:
-			self.action_history.append(ACTIONS["C"])
-			return ACTIONS["C"]  # cooperate
-		else:
-			self.action_history.append(history[-1])
-			return history[-1]
-
-
-class Dove(PlayerStrategy):
-	def __init__(self):
-		super().__init__("Dove")
-
-	def act(self, history):
-		self.action_history.append(ACTIONS["C"])
-		return ACTIONS["C"]
-
-
-class Hawk(PlayerStrategy):
-	def __init__(self):
-		super().__init__("Hawk")
-
-	def act(self, history):
-		self.action_history.append(ACTIONS["D"])
-		return ACTIONS["D"]
-
-
-class Random(PlayerStrategy):
-	def __init__(self):
-		super().__init__("Random")
-
-	def act(self, history):
-		self.action_history.append(np.random.choice([0, 1]))
-		return self.action_history[-1]
-
-
-def detect_strategy(player, games=20, verbose=False):
-	"""
-	Runs a few games to detect the strategy of a player.
-	Args:
-		player: a Player object
-		games: (optional) number of games that are played to detect the strategy
-		verbose: whether to print the result
-	"""
-
-	detector = StrategyDetector(games=games)
-
-	verdict = detector.detect(player=player)
-
-	# grabbing a t4t player code ---
-	# if verdict == 0:
-	# 	print(player.brain.W1_.tolist())
-	# 	print(player.brain.W2_.tolist())
-	# 	print(player.brain.Wb1.tolist())
-	# 	print(player.brain.Wb2.tolist())
-	# 	print("---")
-	# --- end of t4t code
-
-	if verbose:
-		print(f"Player {player.identifier} is seen as: {STRATS[verdict]}")
-	return verdict
-
-
-if __name__ == "__main__":
-	for player in [TitForTat(), Dove(), Hawk(), Random()]:
-		detect_strategy(player=player, verbose=True)
+	def analyze_player_history(self, memory_capacity):
+		"""Determines the player's strategy from the player code.
+		
+		Parameters:
+		----------
+		memory_capacity: (int)
+			Memory capacity of the player.
+		"""
+		# Get the strategy codes for the given memory capacity
+		strategy_codes = STRATEGY_CODES[memory_capacity]
+		# Loop over all of them and find the matching one
+		for strategy_id, code in enumerate(strategy_codes):
+			if self.player_strategy_code == code:
+				return strategy_id
+		return strategy_id
