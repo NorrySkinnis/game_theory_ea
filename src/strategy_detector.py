@@ -11,7 +11,7 @@ class StrategyDetector:
 	containg all possible inputs. 
 	
 	Using these inputs, player actions are derived for each of them.
-	This will create a unique mapping that is the transformed into a unique code.
+	This will create a unique mapping that is then transformed into a unique code.
 	
 	This code can be linked to a strategy.
 	
