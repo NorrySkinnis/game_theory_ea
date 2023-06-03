@@ -30,7 +30,10 @@ class StrategyDetector:
 		detected_strategy = self.analyze_player_history()
 		return detected_strategy
 
+	
+
 	def analyze_player_history(self):
+		# Now what do I do here
 		action_history = self.player_action_history
 		# Hawk
 		if ACTIONS['C'] not in action_history:
