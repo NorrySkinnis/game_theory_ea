@@ -71,10 +71,10 @@ class StrategyDetector:
 		# Save player_code
 		self.player_strategy_code = player_code
 		# Determine player strategy from player code
-		player_strategy = self.analyze_player_history(memory_capacity=memory_capacity)
+		player_strategy = self.strategy_from_code(memory_capacity=memory_capacity)
 		return player_strategy
 
-	def analyze_player_history(self, memory_capacity):
+	def strategy_from_code(self, memory_capacity):
 		"""Determines the player's strategy from the player code.
 		
 		Parameters:
