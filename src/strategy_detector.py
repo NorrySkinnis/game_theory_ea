@@ -1,8 +1,10 @@
+# Generic imports
 import numpy as np
-from player import Player
-from constants import STRATEGY_CODES, MAX_MEMORY_CAPACITY
 from itertools import product
 
+# Custom imports
+from player import Player
+from constants import STRATEGY_CODES, MAX_MEMORY_CAPACITY
 
 class StrategyDetector:
 	"""Creates a detector that can determine the current player's strategy.
@@ -45,7 +47,7 @@ class StrategyDetector:
 			permutations[c] = np.array(list(product([0,1], repeat=c)))
 		return permutations
 
-	def detect_strategy(self, player:Player)->int:
+	def detect_strategy(self, player:Player, verbose:bool)->int:
 		"""Detector plays all possible input combination for the current player.
 		
 		Constructs unique code from the inputs for which the player defected.
@@ -55,6 +57,9 @@ class StrategyDetector:
 		----------
 		player: (Player)
 			Player whose strategy is to be detected.	
+		
+		verbose: (bool)
+			Flag to print strategy detection process.
 		"""
 		# Get player's memory capacity
 		memory_capacity = player.memory_capacity
@@ -65,9 +70,17 @@ class StrategyDetector:
 		# Play all possible input combinations
 		for i, history in enumerate(strategy):
 			player_action = player.act(history)
+
+			if verbose:
+				print(f'Input: {history} -> Action: {player_action}')
+
 			# If player defected, add index of input comination to player_code
 			if player_action == 1:
 				player_code.add(i)
+
+		if verbose:
+			print(f'Player code: {player_code}')
+
 		# Save player_code
 		self.player_strategy_code = player_code
 		# Determine player strategy from player code
@@ -93,4 +106,4 @@ class StrategyDetector:
 		for strategy_id, code in enumerate(strategy_codes):
 			if self.player_strategy_code == code:
 				return strategy_id
-		return strategy_id
+		return 5
