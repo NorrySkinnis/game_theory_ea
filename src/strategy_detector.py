@@ -74,13 +74,18 @@ class StrategyDetector:
 		player_strategy = self.strategy_from_code(memory_capacity=memory_capacity)
 		return player_strategy
 
-	def strategy_from_code(self, memory_capacity):
+	def strategy_from_code(self, memory_capacity:int)->int:
 		"""Determines the player's strategy from the player code.
 		
 		Parameters:
 		----------
 		memory_capacity: (int)
 			Memory capacity of the player.
+
+		Returns:
+		--------
+		strategy_id: (int)
+			Id linked to strategy of the player.
 		"""
 		# Get the strategy codes for the given memory capacity
 		strategy_codes = STRATEGY_CODES[memory_capacity]
