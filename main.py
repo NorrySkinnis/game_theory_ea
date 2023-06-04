@@ -1,7 +1,6 @@
 # Generic imports
 import sys
 import os
-import numpy as np
 
 # Sets correct path for imports
 script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -20,10 +19,10 @@ if __name__ == '__main__':
     n_players = 50
     elite = 0.2
     memory_capacity = 3
-    mutation_rate = 0.1
+    mutation_rate = 0.6
 
     # Check if parameters are valid
-    assert n_players >= n_matchups and n_players > 1 and n_players % 2 == 0, 'n_players must be even and larger than 1'
+    assert n_players > 1 and n_players % 2 == 0, 'n_players must be even and larger than 1'
     assert memory_capacity <= MAX_MEMORY_CAPACITY and memory_capacity > 0, f'memory_capacity must be between 1 and {MAX_MEMORY_CAPACITY}'
     
     # Create and run simulation

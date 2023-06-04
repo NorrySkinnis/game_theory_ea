@@ -6,11 +6,12 @@ from itertools import product
 from player import Player
 from constants import STRATEGY_CODES, MAX_MEMORY_CAPACITY
 
+
 class StrategyDetector:
 	"""Creates a detector that can determine the current player's strategy.
 	
 	Given the memory capacity of the current player, the detector constructs an array
-	containg all possible inputs. 
+	containing all possible inputs.
 	
 	Using these inputs, player actions are derived for each of them.
 	This will create a unique mapping that is then transformed into a unique code.
@@ -74,7 +75,7 @@ class StrategyDetector:
 			if verbose:
 				print(f'Input: {history} -> Action: {player_action}')
 
-			# If player defected, add index of input comination to player_code
+			# If player defected, add index of input combination to player_code
 			if player_action == 1:
 				player_code.add(i)
 
