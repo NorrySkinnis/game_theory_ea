@@ -7,7 +7,6 @@ from collections import Counter
 from player import Player
 from constants import STRATEGY_IDS
 
-
 class Evaluator:
     """ Creates the functionality to book keep players' rewards, memory capacities, and strategies over generations."""
 
@@ -66,10 +65,10 @@ class Evaluator:
         plt.hlines(y=coop_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = '-.', color='gray')
         legend.append('all C threshold')
         plt.title('Fitness of Players over Generations')
-        plt.xlabel('generation')
-        plt.ylabel('fitness')
+        plt.xlabel('nth_generation')
+        plt.ylabel('Fitness')
         plt.legend(legend)
-        plt.savefig(f'src/figures/fitness_g{self.n_generations}_p{len(self.players)}.png',bbox_inches='tight')
+        plt.savefig(f'src/figures/fitness_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}_g{self.n_games}.png',bbox_inches='tight')
 
     def plot_strategies(self):
         """ Plot the distribution of strategies over generations."""
@@ -82,9 +81,8 @@ class Evaluator:
                 indeces = np.where(strategies == j)[0]
                 strategy_distributions[j, i] = len(indeces) 
         plt.stackplot(np.arange(n_generations), strategy_distributions, labels=STRATEGY_IDS.values())
-        plt.title(f'Distribution of Strategies over Generations, n_players={len(self.players)}, n_generations={n_generations}, \
-                  n_games={self.n_games}, n_matchups={self.n_matchups}')
+        plt.title(f'Distribution of Strategies over Generations')
         plt.xlabel('nth_generation')
         plt.ylabel(f'Share of Strategies in Population')
         plt.legend()
-        plt.show()
+        plt.savefig(f'src/figures/strategies_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}_g{self.n_games}.png',bbox_inches='tight')
