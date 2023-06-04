@@ -69,7 +69,7 @@ class StrategyDetector:
 		player_code = set()
 		# Play all possible input combinations
 		for i, history in enumerate(strategy):
-			player_action = player.act(history)
+			player_action = player.act(history.reshape(1,-1))
 
 			if verbose:
 				print(f'Input: {history} -> Action: {player_action}')

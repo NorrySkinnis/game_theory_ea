@@ -23,7 +23,7 @@ class Evaluator:
         # Initializes data structure for book keeping
         shape = (len(players), n_generations)
         self.rewards_per_gen = np.zeros(shape)
-        self.strategy_data = -np.ones(shape, dtype=int)
+        self.strategy_data = np.zeros(shape)
         self.memory_capacities_per_gen = np.zeros(shape)
 
     def update(self, player:Player, nth_generation:int, player_strategy:int)->None:

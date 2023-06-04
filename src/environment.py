@@ -166,7 +166,7 @@ class Environment:
                 upper = max_memory_capacity + game_i
                 lower = upper - opponent.memory_capacity
                 history = player.action_history[i + nth_player_matchup, lower:upper]
-                action = opponent.act(history)
+                action = opponent.act(history.reshape(1,-1))
                 
                 if verbose:
                     print(f'Opponent {opponent.identifier}, action: {action}, actions observed: {history}')
