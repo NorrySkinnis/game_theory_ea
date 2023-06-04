@@ -26,7 +26,9 @@ class Environment:
         self.fitness = fitness 
         self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players)] #  + [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players//2, n_players)]
         self.detector = StrategyDetector()
-        self.evaluator = Evaluator(players=self.players, n_generations=n_generations, payoff_matrix=self.payoff_matrix, n_games=self.n_games, n_matchups = self.n_matchups)
+        self.evaluator = Evaluator(players=self.players, n_generations=n_generations, payoff_matrix=self.payoff_matrix,
+                                   n_games=self.n_games, n_matchups=self.n_matchups, mutation_rate=self.mutation_rate,
+                                   memory_capacity=memory_capacity)
 
     def run(self, verbose=False) -> None:
         """ 
