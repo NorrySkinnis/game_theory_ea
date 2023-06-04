@@ -16,11 +16,12 @@ class Environment:
     Supplies players, simulation, and evaluation."""
 
     def __init__(self, n_players: int, n_matchups: int, n_games: int, n_generations: int, memory_capacity: int, 
-                 fitness=lambda x, t: np.power(1, t) * np.sum(x)):
+                 elite: float, fitness=lambda x, t: np.power(1, t) * np.sum(x)):
         self.payoff_matrix = np.array([[(3, 3), (0, 5)], [(5, 0), (1, 1)]])
         self.n_matchups = n_matchups
         self.n_games = n_games
         self.n_generations = n_generations
+        self.elite = elite
         self.fitness = fitness 
         self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players)] #  + [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players//2, n_players)]
         self.detector = StrategyDetector()
@@ -52,8 +53,8 @@ class Environment:
     def evolve(self) -> None:
         """ Evolve generation of players by selecting the fittest individuals and generating their mutated offspring."""
         # Percentage of players that are kept for next generation: Elite
-        elite = 0.6
-        index = int(elite * len(self.players))
+        
+        index = int(self.elite * len(self.players))
         # Sort players in descending order. Elite is until index.
         self.players.sort(key=lambda x: x.reward, reverse=True)
         # Ids of players that do not belong to elite. To be given to new players in next generation
