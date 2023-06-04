@@ -16,12 +16,13 @@ class Environment:
     Supplies players, simulation, and evaluation."""
 
     def __init__(self, n_players: int, n_matchups: int, n_games: int, n_generations: int, memory_capacity: int, 
-                 elite: float, fitness=lambda x, t: np.power(1, t) * np.sum(x)):
+                 elite: float, mutation_rate:float, fitness=lambda x, t: np.power(1, t) * np.sum(x)):
         self.payoff_matrix = np.array([[(3, 3), (0, 5)], [(5, 0), (1, 1)]])
         self.n_matchups = n_matchups
         self.n_games = n_games
         self.n_generations = n_generations
         self.elite = elite
+        self.mutation_rate = mutation_rate
         self.fitness = fitness 
         self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players)] #  + [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players//2, n_players)]
         self.detector = StrategyDetector()
@@ -71,7 +72,7 @@ class Environment:
             child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=self.players[parent_index].memory_capacity)
             child.brain = copy.deepcopy(self.players[parent_index].brain)
             # Mutate brain of child
-            child.brain.mutate()
+            child.brain.mutate(self.mutation_rate)
             # Add child
             new_players.append(child)
         # Create new generation

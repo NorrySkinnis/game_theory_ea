@@ -83,14 +83,18 @@ class MLP():
         output = np.reshape(output, (output.shape[0],))
         return output
 
-    def mutate(self):
+    def mutate(self, mutation_rate:float):
         """Mutate neuron connections of brain."""
         loc = 0
         scale = 1
-        self.W1 += np.random.normal(loc, scale, size=self.W1.shape)
-        self.W2 += np.random.normal(loc, scale, size=self.W2.shape)
-        self.Wb1 += np.random.normal(loc, scale, size=self.Wb1.shape)
-        self.Wb2 += np.random.normal(loc, scale, size=self.Wb2.shape)
+        self.W1 += np.random.normal(loc, scale, size=self.W1.shape) * \
+                   np.random.choice([True, False], size=self.W1.shape, p=[mutation_rate, 1-mutation_rate])
+        self.W2 += np.random.normal(loc, scale, size=self.W2.shape) * \
+                     np.random.choice([True, False], size=self.W2.shape, p=[mutation_rate, 1-mutation_rate])
+        self.Wb1 += np.random.normal(loc, scale, size=self.Wb1.shape) * \
+                        np.random.choice([True, False], size=self.Wb1.shape, p=[mutation_rate, 1-mutation_rate])
+        self.Wb2 += np.random.normal(loc, scale, size=self.Wb2.shape) * \
+                        np.random.choice([True, False], size=self.Wb2.shape, p=[mutation_rate, 1-mutation_rate])
 
     def crossover(self, other):
         """Cross over genes of player with another
