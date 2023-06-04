@@ -13,8 +13,8 @@ class Player:
         self.memory_capacity = memory_capacity 
 
         # Initialize brain, action history, reward, and number of matchups played
-        #self.brain = MLP(n_input=memory_capacity, n_hidden=4)
-        self.brain = RMLP(n_input=memory_capacity, n_hidden=4, n_matchups=n_matchups)
+        self.brain = MLP(n_input=memory_capacity, n_hidden=4)
+        # self.brain = RMLP(n_input=memory_capacity, n_hidden=4, n_matchups=n_matchups)
         self.action_history = -np.ones(shape=(n_matchups, n_games+MAX_MEMORY_CAPACITY), dtype=int)
         self.reward = 0
         self.n_matchups_played = 0
@@ -49,6 +49,27 @@ class Player:
         self.reward = 0
         self.n_matchups_played = 0
         self.initialize_action_history()
+
+        
+    ###### MEMORY CAPACITY 3 ######
+    @classmethod
+    def t4tplayer(cls, identifier: int, n_matchups: int, n_games: int, memory_capacity=3):
+        """hardcode a t4t player with memory 3. args are the same as __init__()
+
+        Args:
+            identifier: unique identifier for player
+            n_matchups: number of matchups per generation
+            n_games: number of games per matchup
+            memory_capacity: (optional) number of previous actions to consider when making a decision
+        """
+        Player = cls(identifier, n_matchups, n_games, memory_capacity)
+        Player.brain.W1 = np.array([[-0.0371, -1.79616028, -1.85278918, -0.36712397], 
+                                    [ 1.023125, -1.95754371,  0.19572761,  2.2406184 ], 
+                                    [ 3.14670755 , 2.26807193, -2.07062972,  1.26880808]])
+        Player.brain.W2 = np.array([[ 4.05340057], [ 1.8971397 ], [-0.71286779], [-0.8697603 ]])
+        Player.brain.Wb1 = np.array([[ 0.20788301, -1.10259897, -0.48425731,  0.91187123]])
+        Player.brain.Wb2 = np.array([[-3.90045399]])
+        return Player
 
 class MLP():
     """Creates a multi-layer perceptron with a single hidden layer."""

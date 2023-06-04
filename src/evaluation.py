@@ -94,7 +94,8 @@ class Evaluator:
         plt.ylabel(f'Share of Strategies in Population')
         plt.margins(x=0)
         plt.margins(y=0)
-        plt.legend()
+        plt.yticks([])
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.savefig(f'src/figures/strats_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
         f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png',
                     bbox_inches='tight')

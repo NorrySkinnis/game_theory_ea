@@ -4,7 +4,7 @@ from itertools import product
 
 # Custom imports
 from player import Player
-from constants import STRATEGY_CODES, MAX_MEMORY_CAPACITY
+from constants import STRATEGY_CODES, MAX_MEMORY_CAPACITY, STRATEGY_IDS
 
 
 class StrategyDetector:
@@ -107,4 +107,4 @@ class StrategyDetector:
 		for strategy_id, code in enumerate(strategy_codes):
 			if self.player_strategy_code == code:
 				return strategy_id
-		return 5
+		return list(STRATEGY_IDS.keys())[-1]

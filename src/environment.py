@@ -25,7 +25,8 @@ class Environment:
         self.elite = elite
         self.mutation_rate = mutation_rate
         self.fitness = fitness 
-        self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players)] #  + [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players//2, n_players)]
+        # currently half tft half random
+        self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players)] # + [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players//2, n_players)]
         self.detector = StrategyDetector()
         self.evaluator = Evaluator(players=self.players, n_generations=n_generations, payoff_matrix=self.payoff_matrix,
                                    n_games=self.n_games, n_matchups=self.n_matchups, mutation_rate=self.mutation_rate,
@@ -47,7 +48,7 @@ class Environment:
             for p in self.players:
                 # Ignore entries with -1, which means no matchup
                 opponent_ids = matchups[matchups[:, p.identifier] >= 0, p.identifier]
-                self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
+                self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=False)
                 player_strategy = self.detector.detect_strategy(player=p, verbose=verbose)
                 self.evaluator.update(player=p, nth_generation=gen_i, player_strategy=player_strategy)           
             self.evolve()
