@@ -1,6 +1,7 @@
 # Generic imports
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 # Custom imports
 from player import Player
@@ -25,6 +26,9 @@ class Evaluator:
         self.rewards_per_gen = np.zeros(shape)
         self.strategy_data = -np.ones(shape, dtype=int)
         self.memory_capacities_per_gen = np.zeros(shape)
+
+        if not os.path.isdir("./src/figures"):
+            os.mkdir("./src/figures")
 
     def update(self, player: Player, nth_generation: int, player_strategy: int) -> None:
         """Triggers snapshot of players' rewards, memory capacities, strategy at nth generation.
