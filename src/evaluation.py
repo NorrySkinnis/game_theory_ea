@@ -1,11 +1,11 @@
 # Generic imports
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import Counter
 
 # Custom imports
 from player import Player
 from constants import STRATEGY_IDS
+
 
 class Evaluator:
     """ Creates the functionality to book keep players' rewards, memory capacities, and strategies over generations."""
@@ -26,7 +26,7 @@ class Evaluator:
         self.strategy_data = np.zeros(shape)
         self.memory_capacities_per_gen = np.zeros(shape)
 
-    def update(self, player:Player, nth_generation:int, player_strategy:int)->None:
+    def update(self, player: Player, nth_generation: int, player_strategy: int) -> None:
         """Triggers snapshot of players' rewards, memory capacities, strategy at nth generation.
         
         Parameters:
@@ -53,11 +53,11 @@ class Evaluator:
         legend = []
         # Plot min, max, avg of fitness
         plt.figure()
-        plt.plot(gens, max_reward, label='Max', c = 'm')
+        plt.plot(gens, max_reward, label='Max', c='m')
         legend.append('max')
         plt.plot(gens, mean_reward, label='Avg', c='r')
         legend.append('avg')
-        plt.plot(gens, min_reward, label='Min', c = 'm')
+        plt.plot(gens, min_reward, label='Min', c='m')
         legend.append('min')
         # Plot max theoretical fitness
         betray_reward = np.max(self.payoff_matrix)
@@ -71,8 +71,8 @@ class Evaluator:
         plt.xlabel('nth_generation')
         plt.ylabel('Fitness')
         plt.legend(legend)
-        plt.savefig(f'src/figures/fitness_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}\
-            _g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png', bbox_inches='tight')
+        plt.savefig(f'src/figures/fitness_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
+            f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png', bbox_inches='tight')
 
     def plot_strategies(self):
         """ Plot the distribution of strategies over generations."""
@@ -91,6 +91,6 @@ class Evaluator:
         plt.margins(x=0)
         plt.margins(y=0)
         plt.legend()
-        plt.savefig(f'src/figures/strats_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}\
-        _g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png',
+        plt.savefig(f'src/figures/strats_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
+        f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png',
                     bbox_inches='tight')

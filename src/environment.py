@@ -10,6 +10,7 @@ from evaluation import Evaluator
 from strategy_detector import StrategyDetector
 from constants import MAX_MEMORY_CAPACITY, STRATEGY_IDS 
 
+
 class Environment:
     """Creates an environment for the IPD game.
     
