@@ -19,7 +19,7 @@ if __name__ == '__main__':
     n_players = 50
     elite = 0.2
     memory_capacity = 3
-    mutation_rate = 0.6
+    mutation_rate = 1
 
     # Check if parameters are valid
     assert n_players > 1 and n_players % 2 == 0, 'n_players must be even and larger than 1'
@@ -30,12 +30,3 @@ if __name__ == '__main__':
                       n_generations=n_generations, elite=elite, memory_capacity=memory_capacity)
 
     env.run(verbose=False)
-
-
-
-    
-
-
-
-
-

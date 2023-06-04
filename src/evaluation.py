@@ -71,8 +71,8 @@ class Evaluator:
         plt.xlabel('nth_generation')
         plt.ylabel('Fitness')
         plt.legend(legend)
-        plt.savefig(f'src/figures/fitness_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}\
-            _g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png', bbox_inches='tight')
+        plt.savefig(f'src/figures/fitness_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
+            f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png', bbox_inches='tight')
 
     def plot_strategies(self):
         """ Plot the distribution of strategies over generations."""
@@ -91,6 +91,6 @@ class Evaluator:
         plt.margins(x=0)
         plt.margins(y=0)
         plt.legend()
-        plt.savefig(f'src/figures/strats_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}\
-        _g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png',
+        plt.savefig(f'src/figures/strats_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
+        f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png',
                     bbox_inches='tight')
