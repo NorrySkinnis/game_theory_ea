@@ -12,7 +12,7 @@ class Evaluator:
     """ Creates the functionality to book keep players' rewards, memory capacities, and strategies over generations."""
 
     def __init__(self, players:list[Player], n_generations:int, n_games:int, n_matchups:int, memory_capacity:int,
-                 mutation_rate:float, payoff_matrix:np.ndarray):
+                 mutation_rate:float, elite:float, payoff_matrix:np.ndarray, figure_path:str = "./src/figures"):
         self.players = players
         self.n_generations = n_generations
         self.n_games = n_games
@@ -20,15 +20,17 @@ class Evaluator:
         self.payoff_matrix = payoff_matrix
         self.mutation_rate = mutation_rate
         self.memory_capacity = memory_capacity
+        self.elite = elite
         
         # Initializes data structure for book keeping
         shape = (len(players), n_generations)
         self.rewards_per_gen = np.zeros(shape)
         self.strategy_data = np.zeros(shape)
         self.memory_capacities_per_gen = np.zeros(shape)
+        self.figure_path = figure_path
 
-        if not os.path.isdir("./src/figures"):
-            os.mkdir("./src/figures")
+        if not os.path.isdir(figure_path):
+            os.mkdir(figure_path)
 
     def update(self, player: Player, nth_generation: int, player_strategy: int) -> None:
         """Triggers snapshot of players' rewards, memory capacities, strategy at nth generation.
@@ -75,8 +77,9 @@ class Evaluator:
         plt.xlabel('nth_generation')
         plt.ylabel('Fitness')
         plt.legend(legend)
-        plt.savefig(f'src/figures/fitness_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
-            f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png', bbox_inches='tight')
+        plt.savefig(f'{self.figure_path}/fitness_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
+            f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}_eli{self.elite}.png',
+                    bbox_inches='tight')
 
     def plot_strategies(self):
         """ Plot the distribution of strategies over generations."""
@@ -92,10 +95,11 @@ class Evaluator:
         plt.title(f'Distribution of Strategies over Generations')
         plt.xlabel('nth_generation')
         plt.ylabel(f'Share of Strategies in Population')
-        plt.margins(x=0)
+        plt.margins(x=1)
         plt.margins(y=0)
         plt.yticks([])
+        plt.xticks(np.linspace(0, n_generations+1, n_generations//10))
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.savefig(f'src/figures/strats_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
-        f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png',
+        plt.savefig(f'{self.figure_path}/strats_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
+        f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}_eli{self.elite}.png',
                     bbox_inches='tight')

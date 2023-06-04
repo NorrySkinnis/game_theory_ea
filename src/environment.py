@@ -17,7 +17,8 @@ class Environment:
     Supplies players, simulation, and evaluation."""
 
     def __init__(self, n_players: int, n_matchups: int, n_games: int, n_generations: int, memory_capacity: int, 
-                 elite: float, mutation_rate:float, fitness=lambda x, t: np.power(1, t) * np.sum(x)):
+                 elite: float, mutation_rate: float, fitness=lambda x, t: np.power(1, t) * np.sum(x),
+                 figure_path="./src/figures"):
         self.payoff_matrix = np.array([[(3, 3), (0, 5)], [(5, 0), (1, 1)]])
         self.n_matchups = n_matchups
         self.n_games = n_games
@@ -30,7 +31,7 @@ class Environment:
         self.detector = StrategyDetector()
         self.evaluator = Evaluator(players=self.players, n_generations=n_generations, payoff_matrix=self.payoff_matrix,
                                    n_games=self.n_games, n_matchups=self.n_matchups, mutation_rate=self.mutation_rate,
-                                   memory_capacity=memory_capacity)
+                                   memory_capacity=memory_capacity, elite=elite, figure_path=figure_path)
 
     def run(self, verbose=False) -> None:
         """ 
