@@ -131,11 +131,14 @@ class MLP():
         """
         crossover_p = 0.2
         # switch weight vectors randomly between 2 players
-        for col in range(self.W1.shape[1]):
+        for i in range(self.W1.shape[1]):
             if random.random() < crossover_p:
-                temp = self.W1[:,col]
-                self.W1[:,col] = other.W1[:,col]
-                other.W1[:,col] = temp
+                temp_w = self.W1[:,i]
+                temp_b = self.Wb1[:,i]
+                self.W1[:,i] = other.W1[:,i]
+                self.Wb1[:,i] = other.Wb1[:,i]
+                other.W1[:,i] = temp_w
+                other.Wb1[:,i] = temp_b
     
 class RMLP():
     """Creates a recurrent multi-layer perceptron with a single hidden layer."""

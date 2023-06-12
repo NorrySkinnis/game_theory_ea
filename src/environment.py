@@ -17,13 +17,14 @@ class Environment:
     Supplies players, simulation, and evaluation."""
 
     def __init__(self, n_players: int, n_matchups: int, n_games: int, n_generations: int, memory_capacity: int, 
-                 elite: float, mutation_rate:float, fitness=lambda x, t: np.power(1, t) * np.sum(x)):
+                 elite: float, mutation_rate:float, crossover:bool, fitness=lambda x, t: np.power(1, t) * np.sum(x)):
         self.payoff_matrix = np.array([[(3, 3), (0, 5)], [(5, 0), (1, 1)]])
         self.n_matchups = n_matchups
         self.n_games = n_games
         self.n_generations = n_generations
         self.elite = elite
         self.mutation_rate = mutation_rate
+        self.crossover = crossover
         self.fitness = fitness 
         self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players)] # + [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players//2, n_players)]
         self.detector = StrategyDetector()
@@ -47,7 +48,7 @@ class Environment:
             for p in self.players:
                 # Ignore entries with -1, which means no matchup
                 opponent_ids = matchups[matchups[:, p.identifier] >= 0, p.identifier]
-                self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=False)
+                self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
                 player_strategy = self.detector.detect_strategy(player=p, verbose=verbose)
                 self.evaluator.update(player=p, nth_generation=gen_i, player_strategy=player_strategy)           
             self.evolve()
@@ -68,14 +69,13 @@ class Environment:
         new_players = []
         # Create new players until all ids are used
         for id in available_ids:
-            # Select two random parents from elite. Only use second one if crossover is enabled
+            # Select two random parents from elite. Only use second if crossover is enabled
             parent_indeces = random.sample(set(range(index)), 2)
-            crossover = False
             parent1 = self.players[parent_indeces[0]]
             child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=parent1.memory_capacity)
             child.brain = copy.deepcopy(parent1.brain)
             # If crossover is enabled, then create dummy child and perform crossover
-            if crossover:
+            if self.crossover:
                 parent2 = self.players[parent_indeces[1]]
                 dummy_child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=parent2.memory_capacity)  
                 dummy_child.brain = copy.deepcopy(parent2.brain)
