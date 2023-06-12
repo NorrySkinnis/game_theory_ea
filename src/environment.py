@@ -8,7 +8,7 @@ import copy
 from player import Player
 from evaluation import Evaluator
 from strategy_detector import StrategyDetector
-from constants import MAX_MEMORY_CAPACITY, STRATEGY_IDS 
+from constants import MAX_MEMORY_CAPACITY
 
 
 class Environment:
@@ -25,7 +25,6 @@ class Environment:
         self.elite = elite
         self.mutation_rate = mutation_rate
         self.fitness = fitness 
-        # currently half tft half random
         self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players)] # + [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players//2, n_players)]
         self.detector = StrategyDetector()
         self.evaluator = Evaluator(players=self.players, n_generations=n_generations, payoff_matrix=self.payoff_matrix,
@@ -58,7 +57,6 @@ class Environment:
     def evolve(self) -> None:
         """ Evolve generation of players by selecting the fittest individuals and generating their mutated offspring."""
         # Percentage of players that are kept for next generation: Elite
-        
         index = int(self.elite * len(self.players))
         # Sort players in descending order. Elite is until index.
         self.players.sort(key=lambda x: x.reward, reverse=True)
@@ -70,26 +68,25 @@ class Environment:
         new_players = []
         # Create new players until all ids are used
         for id in available_ids:
-            # Select random parent to inherit brain
-            parent_index = random.randint(0, index-1)
-            # Create new player
-            child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=self.players[parent_index].memory_capacity)
-            child.brain = copy.deepcopy(self.players[parent_index].brain)
+            # Select two random parents from elite. Only use second one if crossover is enabled
+            parent_indeces = random.sample(set(range(index)), 2)
+            crossover = False
+            parent1 = self.players[parent_indeces[0]]
+            child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=parent1.memory_capacity)
+            child.brain = copy.deepcopy(parent1.brain)
+            # If crossover is enabled, then create dummy child and perform crossover
+            if crossover:
+                parent2 = self.players[parent_indeces[1]]
+                dummy_child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=parent2.memory_capacity)  
+                dummy_child.brain = copy.deepcopy(parent2.brain)
+                child.brain.crossover(dummy_child.brain)
             # Mutate brain of child
             child.brain.mutate(self.mutation_rate)
-            # Add child
+            # One child policy. 
             new_players.append(child)
         # Create new generation
         self.players[index:] = new_players
         # Reset player information and ids. Ids HAVE to be sorted ascending in new list
-
-        # crossover tryout code
-        # combis = []
-        # for _ in range(len(self.players)):
-        #     combis.append(random.sample(range(len(self.players)), 2))
-        # for combo in combis:
-        #     self.players[combo[0]].crossover(self.players[combo[1]])
-            
         for i, p in enumerate(self.players):
             p.reset()
             p.identifier = i
