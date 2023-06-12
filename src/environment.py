@@ -17,7 +17,7 @@ class Environment:
     Supplies players, simulation, and evaluation."""
 
     def __init__(self, n_players: int, n_matchups: int, n_games: int, n_generations: int, memory_capacity: int, 
-                 elite: float, mutation_rate:float, crossover:bool, fitness=lambda x, t: np.power(1, t) * np.sum(x)):
+                 elite: float, mutation_rate:float, crossover:bool, crossover_p:float, fitness=lambda x, t: np.power(1, t) * np.sum(x)):
         self.payoff_matrix = np.array([[(3, 3), (0, 5)], [(5, 0), (1, 1)]])
         self.n_matchups = n_matchups
         self.n_games = n_games
@@ -25,6 +25,7 @@ class Environment:
         self.elite = elite
         self.mutation_rate = mutation_rate
         self.crossover = crossover
+        self.crossover_p = crossover_p
         self.fitness = fitness 
         self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players)] # + [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players//2, n_players)]
         self.detector = StrategyDetector()
@@ -79,7 +80,7 @@ class Environment:
                 parent2 = self.players[parent_indeces[1]]
                 dummy_child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=parent2.memory_capacity)  
                 dummy_child.brain = copy.deepcopy(parent2.brain)
-                child.brain.crossover(dummy_child.brain)
+                child.brain.crossover(dummy_child.brain, self.crossover_p)
             # Mutate brain of child
             child.brain.mutate(self.mutation_rate)
             # One child policy. 

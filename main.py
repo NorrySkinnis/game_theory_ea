@@ -16,11 +16,13 @@ from player import Player
 if __name__ == '__main__':
 
     # Set simulation parameters
-    n_games = 50
+    n_games = 30
     n_matchups = 70
-    n_generations = 200
+    n_generations = 100
     n_players = 100
     elite = 0.5
+    crossover = True
+    crossover_p= 0.5
     memory_capacity = 3
     mutation_rate = 0.6
 
@@ -30,6 +32,7 @@ if __name__ == '__main__':
     
     # Create and run simulation
     env = Environment(n_players=n_players, n_games=n_games, n_matchups=n_matchups, mutation_rate=mutation_rate,
-                      n_generations=n_generations, elite=elite, memory_capacity=memory_capacity)
+                      n_generations=n_generations, elite=elite, crossover=crossover, crossover_p=crossover_p,
+                      memory_capacity=memory_capacity)
 
     env.run(verbose=False)

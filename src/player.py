@@ -123,14 +123,12 @@ class MLP():
         self.Wb2 += np.random.normal(loc, scale, size=self.Wb2.shape) * \
             np.random.choice([True, False], size=self.Wb2.shape, p=[mutation_rate, 1-mutation_rate])
 
-    def crossover(self, other):
+    def crossover(self, other, crossover_p:float):
         """Cross over genes of player with another
 
         Args:
             other (Player): player to cross over with
         """
-        crossover_p = 0.2
-        # switch weight vectors randomly between 2 players
         for i in range(self.W1.shape[1]):
             if random.random() < crossover_p:
                 temp_w = self.W1[:,i]
