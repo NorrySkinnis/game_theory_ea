@@ -1,7 +1,7 @@
 # Generic imports
 import sys
 import os
-import numpy as np
+from collections import Counter
 
 # Sets correct path for imports
 script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # Set simulation parameters
     n_games = 30
     n_matchups = 70
-    n_generations = 100
+    n_generations = 200
     n_players = 100
 
     # Set simulation hyperparameters
@@ -37,3 +37,10 @@ if __name__ == '__main__':
                       memory_capacity=memory_capacity)
 
     env.run(verbose=False)
+
+    # Used printing out the codes of the undetermined strategies
+
+    # unknown = env.detector.undetermined_strategies
+    # strategy_count = Counter(frozenset(s) for s in unknown)
+    # print(strategy_count)
+

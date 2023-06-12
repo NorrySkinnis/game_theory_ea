@@ -33,6 +33,7 @@ class StrategyDetector:
 	def __init__(self):
 		self.player_strategy_code = None
 		self.strategy = self.set_strategy()
+		self.undetermined_strategies = []
 
 	def set_strategy(self)->dict[int, np.ndarray]:
 		"""Constructs a dictionary of all possible input combinations for each memory capacity.
@@ -108,4 +109,6 @@ class StrategyDetector:
 		for strategy_id, code in enumerate(strategy_codes):
 			if self.player_strategy_code == code:
 				return strategy_id
+		# Record undetermined strategies
+		self.undetermined_strategies.append(self.player_strategy_code)
 		return list(STRATEGY_IDS.keys())[-1]
