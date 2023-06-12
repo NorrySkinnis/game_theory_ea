@@ -16,19 +16,19 @@ class StrategyDetector:
 	Using these inputs, player actions are derived for each of them.
 	This will create a unique mapping that is then transformed into a unique code.
 	
-	This code can be linked to a strategy.
+	This code can then be linked to a strategy.
 	
 	Example: 
 	--------
-	Memory capacity = 1: 0 -> C, 1 -> D
+	Memory capacity = 1: -1 -> C, 1 -> D
 
-	Possible inputs: [0], [1]
+	Possible inputs: [-1], [1]
 	
-	Detector strategy: [[0], [1]]
+	Detector strategy: [[-1], [1]]
 	
-	Possible player codes: [0, 0], [0, 1], [1, 0], [1, 1]
+	Possible players' responses: [-1, -1], [-1, 1], [1, -1], [1, 1]
 	
-	Transformed player codes: {}, {1}, {0}, {0, 1}
+	According player codes: {}, {1}, {0}, {0, 1}
 	"""
 	def __init__(self):
 		self.player_strategy_code = None
@@ -45,7 +45,8 @@ class StrategyDetector:
 		keys = [c for c in range(1, MAX_MEMORY_CAPACITY+1)]
 		permutations = {key: None for key in keys}
 		for c in range(1,MAX_MEMORY_CAPACITY+1):
-			permutations[c] = np.array(list(product([0,1], repeat=c)))
+			permutations[c] = np.array(list(product([-1,1], repeat=c)))
+			# permutations[c] = np.array(list(product([0,1], repeat=c)))
 		return permutations
 
 	def detect_strategy(self, player:Player, verbose:bool)->int:

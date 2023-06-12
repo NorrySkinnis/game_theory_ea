@@ -1,6 +1,7 @@
 # Generic imports
 import sys
 import os
+import numpy as np
 
 # Sets correct path for imports
 script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -10,8 +11,6 @@ sys.path.append(module_path)
 # Custom imports
 from environment import Environment 
 from constants import MAX_MEMORY_CAPACITY
-from strategy_detector import StrategyDetector
-from player import Player
 
 if __name__ == '__main__':
 
@@ -20,6 +19,8 @@ if __name__ == '__main__':
     n_matchups = 70
     n_generations = 100
     n_players = 100
+
+    # Set simulation hyperparameters
     elite = 0.5
     crossover = True
     crossover_p= 0.5

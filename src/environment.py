@@ -57,7 +57,9 @@ class Environment:
         self.evaluator.plot_strategies()   
 
     def evolve(self) -> None:
-        """ Evolve generation of players by selecting the fittest individuals and generating their mutated offspring."""
+        """ Evolve generation of players by selecting the fittest individuals 
+        and generating their mutated offspring.
+        """
         # Percentage of players that are kept for next generation: Elite
         index = int(self.elite * len(self.players))
         # Sort players in descending order. Elite is until index.
@@ -73,16 +75,18 @@ class Environment:
             # Select two random parents from elite. Only use second if crossover is enabled
             parent_indeces = random.sample(set(range(index)), 2)
             parent1 = self.players[parent_indeces[0]]
-            child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=parent1.memory_capacity)
+            child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, 
+                           memory_capacity=parent1.memory_capacity)
             child.brain = copy.deepcopy(parent1.brain)
             # If crossover is enabled, then create dummy child and perform crossover
             if self.crossover:
                 parent2 = self.players[parent_indeces[1]]
-                dummy_child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=parent2.memory_capacity)  
+                dummy_child = Player(identifier=id, n_matchups=self.n_matchups, 
+                                     n_games=self.n_games, memory_capacity=parent2.memory_capacity)  
                 dummy_child.brain = copy.deepcopy(parent2.brain)
-                child.brain.crossover(dummy_child.brain, self.crossover_p)
+                child.brain.crossover(other=dummy_child.brain, crossover_p=self.crossover_p)
             # Mutate brain of child
-            child.brain.mutate(self.mutation_rate)
+            child.brain.mutate(mutation_rate=self.mutation_rate)
             # One child policy. 
             new_players.append(child)
         # Create new generation
@@ -139,11 +143,11 @@ class Environment:
         opponent_actions = -np.ones(shape=(n, self.n_games + max_memory_capacity), dtype=int)
         # Matchups played by opponents so far. Exclusively used for resetting
         n_matchups_played = np.array(list(map(lambda id: self.players[id].n_matchups_played, opponent_ids)))
-        # Simulate games
         
         if verbose:
             print(f'----------------------------\nPlayer {player.identifier} vs. Players:{opponent_ids}')
         
+        # Simulate games
         for game_i in range(self.n_games): 
             
             if verbose:
@@ -190,10 +194,12 @@ class Environment:
             
             # Add player actions to player action history
             player.action_history[nth_player_matchup:nth_player_matchup + n, upper] = player_actions
-            # Determine rewards for player and opponents
-            nth_player_matchup = player.n_matchups_played
-            rewards = self.payoff_matrix[player_actions, opponent_actions[:,upper]]
-            # print(player.action_history[nth_player_matchup,upper]) 
+            # nth_player_matchup = player.n_matchups_played
+            # Transform actions to indeces
+            indeces_player_actions = np.array(player_actions >= 0, dtype=bool) * 1
+            indeces_opponent_actions = np.array(opponent_actions[:,upper] >= 0, dtype=bool) * 1
+            rewards = self.payoff_matrix[indeces_player_actions, indeces_opponent_actions]
+            # rewards = self.payoff_matrix[player_actions, opponent_actions[:,upper]]
 
             if verbose:
                 print(f'>> Rewards: Opponents: {rewards[:,1]}, Player: {rewards[:,0]}')

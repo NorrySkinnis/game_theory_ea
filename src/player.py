@@ -100,7 +100,8 @@ class MLP():
             Output matrix of shape (n, 1), one action for each opponent. 
         """
         output = self.f1(X @ self.W1 + self.Wb1) @ self.W2 + self.Wb2
-        output = np.array(output >= 0, dtype=bool) * 1
+        output = 2 * np.array(output >= 0, dtype=bool) - 1
+        # output = np.array(output >= 0, dtype=bool) * 1
         output = np.reshape(output, (output.shape[0],))
         return output
 
