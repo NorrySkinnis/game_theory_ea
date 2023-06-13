@@ -139,70 +139,70 @@ class MLP():
                 other.W1[:,i] = temp_w
                 other.Wb1[:,i] = temp_b
     
-class RMLP():
-    """Creates a recurrent multi-layer perceptron with a single hidden layer."""
-    def __init__(self, n_input:int, n_hidden:int, n_matchups:int):
-        # Weights of first fully connected layer
-        self.W1 = np.random.normal(loc=0, scale=1, size=(n_input, n_hidden))
-        # Weights of second fully connected layer
-        self.W2 = np.random.normal(loc=0, scale=1, size=(n_hidden, 1))
-        # Weights of hidden layer
-        self.Wh = np.random.normal(loc=0, scale=1, size=(n_hidden, n_hidden))
-        # Bias of first fully connected layer
-        self.Wb1 = np.random.normal(loc=0, scale=1, size=(1, n_hidden))
-        # Bias of second fully connected layer
-        self.Wb2 = np.random.normal(loc=0, scale=1, size=(1, 1))
-        # Initialize data container for hidden states 
-        self.h = np.random.normal(loc=0, scale=1, size=(n_matchups, n_hidden, 2))
-        # Activation function (ReLU)
-        self.f1 = lambda x: np.maximum(0, x)  
+# class RMLP():
+#     """Creates a recurrent multi-layer perceptron with a single hidden layer."""
+#     def __init__(self, n_input:int, n_hidden:int, n_matchups:int):
+#         # Weights of first fully connected layer
+#         self.W1 = np.random.normal(loc=0, scale=1, size=(n_input, n_hidden))
+#         # Weights of second fully connected layer
+#         self.W2 = np.random.normal(loc=0, scale=1, size=(n_hidden, 1))
+#         # Weights of hidden layer
+#         self.Wh = np.random.normal(loc=0, scale=1, size=(n_hidden, n_hidden))
+#         # Bias of first fully connected layer
+#         self.Wb1 = np.random.normal(loc=0, scale=1, size=(1, n_hidden))
+#         # Bias of second fully connected layer
+#         self.Wb2 = np.random.normal(loc=0, scale=1, size=(1, 1))
+#         # Initialize data container for hidden states 
+#         self.h = np.random.normal(loc=0, scale=1, size=(n_matchups, n_hidden, 2))
+#         # Activation function (ReLU)
+#         self.f1 = lambda x: np.maximum(0, x)  
 
-    def forward(self, X: np.ndarray) -> np.ndarray:
-        """ Forwards input through network and returns actions.
+#     def forward(self, X: np.ndarray) -> np.ndarray:
+#         """ Forwards input through network and returns actions.
 
-        Parameters:
-        -----------
-        X: (np.ndarray)
-            Input matrix of shape (n, m), where n is the number of opponents 
-            and m is the number of actions observed.
+#         Parameters:
+#         -----------
+#         X: (np.ndarray)
+#             Input matrix of shape (n, m), where n is the number of opponents 
+#             and m is the number of actions observed.
         
-        Returns:
-        --------
-        output: (np.ndarray)
-            Output matrix of shape (n, 1), one action for each opponent. 
-        """
-        n_opponents = X.shape[0]
-        # Compute hiddent state using previous hidden state
-        self.h[:n_opponents,:,1] = self.f1(X @ self.W1 + self.h[:n_opponents,:,0] @ self.Wh + self.Wb1)
-        output = self.h[:n_opponents,:,1] @ self.W2 + self.Wb2
-        output = np.array(output >= 0, dtype=bool) * 1
-        output = np.reshape(output, (output.shape[0],))
-        # Update hidden state
-        self.h[:n_opponents,:,0]= self.h[:n_opponents,:,1]
+#         Returns:
+#         --------
+#         output: (np.ndarray)
+#             Output matrix of shape (n, 1), one action for each opponent. 
+#         """
+#         n_opponents = X.shape[0]
+#         # Compute hiddent state using previous hidden state
+#         self.h[:n_opponents,:,1] = self.f1(X @ self.W1 + self.h[:n_opponents,:,0] @ self.Wh + self.Wb1)
+#         output = self.h[:n_opponents,:,1] @ self.W2 + self.Wb2
+#         output = np.array(output >= 0, dtype=bool) * 1
+#         output = np.reshape(output, (output.shape[0],))
+#         # Update hidden state
+#         self.h[:n_opponents,:,0]= self.h[:n_opponents,:,1]
 
-        return output
+#         return output
     
-    def mutate(self, mutation_rate:float):
-        """ Mutate neuron connections of brain.
+#     def mutate(self, mutation_rate:float):
+#         """ Mutate neuron connections of brain.
         
-        Parameters:
-        -----------
-        mutation_rate: (float)
-            Probability of mutation.
-        """
-        # Strength of mutation
-        loc = 0
-        scale = 1
+#         Parameters:
+#         -----------
+#         mutation_rate: (float)
+#             Probability of mutation.
+#         """
+#         # Strength of mutation
+#         loc = 0
+#         scale = 1
 
-        self.W1 += np.random.normal(loc, scale, size=self.W1.shape) * \
-            np.random.choice([True, False], size=self.W1.shape, p=[mutation_rate, 1-mutation_rate])
-        self.W2 += np.random.normal(loc, scale, size=self.W2.shape) * \
-            np.random.choice([True, False], size=self.W2.shape, p=[mutation_rate, 1-mutation_rate])
-        self.Wh += np.random.normal(loc, scale, size=self.Wh.shape) * \
-            np.random.choice([True, False], size=self.Wh.shape, p=[mutation_rate, 1-mutation_rate])
-        self.Wb1 += np.random.normal(loc, scale, size=self.Wb1.shape) * \
-            np.random.choice([True, False], size=self.Wb1.shape, p=[mutation_rate, 1-mutation_rate])
-        self.Wb2 += np.random.normal(loc, scale, size=self.Wb2.shape) * \
-            np.random.choice([True, False], size=self.Wb2.shape, p=[mutation_rate, 1-mutation_rate])
+#         self.W1 += np.random.normal(loc, scale, size=self.W1.shape) * \
+#             np.random.choice([True, False], size=self.W1.shape, p=[mutation_rate, 1-mutation_rate])
+#         self.W2 += np.random.normal(loc, scale, size=self.W2.shape) * \
+#             np.random.choice([True, False], size=self.W2.shape, p=[mutation_rate, 1-mutation_rate])
+#         self.Wh += np.random.normal(loc, scale, size=self.Wh.shape) * \
+#             np.random.choice([True, False], size=self.Wh.shape, p=[mutation_rate, 1-mutation_rate])
+#         self.Wb1 += np.random.normal(loc, scale, size=self.Wb1.shape) * \
+#             np.random.choice([True, False], size=self.Wb1.shape, p=[mutation_rate, 1-mutation_rate])
+#         self.Wb2 += np.random.normal(loc, scale, size=self.Wb2.shape) * \
+#             np.random.choice([True, False], size=self.Wb2.shape, p=[mutation_rate, 1-mutation_rate])
 
           

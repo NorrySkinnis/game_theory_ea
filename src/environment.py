@@ -53,8 +53,8 @@ class Environment:
                 player_strategy = self.detector.detect_strategy(player=p, verbose=verbose)
                 self.evaluator.update(player=p, nth_generation=gen_i, player_strategy=player_strategy)           
             self.evolve()
-        self.evaluator.plot_fitness()
-        self.evaluator.plot_strategies()   
+        # self.evaluator.plot_fitness()
+        # self.evaluator.plot_strategies()   
 
     def evolve(self) -> None:
         """ Evolve generation of players by selecting the fittest individuals 

@@ -49,7 +49,7 @@ class Evaluator:
         self.memory_capacities_per_gen[player.identifier,nth_generation] = player.memory_capacity
 
     def plot_fitness(self):
-        """Plots fitness dynamics after simulation is finished."""
+        """Plots fitness dynamics for a single simulation."""
         gens = np.arange(self.n_generations)
         max_reward = np.max(self.rewards_per_gen, axis=0)
         min_reward = np.min(self.rewards_per_gen, axis=0)
@@ -75,11 +75,10 @@ class Evaluator:
         plt.xlabel('nth_generation')
         plt.ylabel('Fitness')
         plt.legend(legend)
-        plt.savefig(f'src/figures/fitness_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
-            f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png', bbox_inches='tight')
+        plt.savefig('.png', bbox_inches='tight')
 
     def plot_strategies(self):
-        """ Plot the distribution of strategies over generations."""
+        """ Plots distribution dynamics for a single simulation."""
         plt.figure()
         n_generations = self.n_generations
         strategy_distributions = np.zeros(shape=(len(STRATEGY_IDS), n_generations))
@@ -95,7 +94,41 @@ class Evaluator:
         plt.margins(x=0)
         plt.margins(y=0)
         plt.yticks([])
+        plt.xticks(np.arange(n_generations, step=50))
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.savefig(f'src/figures/strats_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
-        f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png',
-                    bbox_inches='tight')
+        plt.savefig('.png',bbox_inches='tight')
+    
+    @staticmethod
+    def plot_average_strategies(strategies:list[np.ndarray]) -> None:
+        """ Plots the average of strategies across multiple runs of the same simulation.
+        
+        Parameters:
+        -----------
+        strategies: (list[np.ndarray])
+            List of strategies to be averaged. Length = number of runs of the same simulation.
+        """
+        plt.figure(figsize=(10,4))
+        plt.subplots_adjust(left=0.1, right=0.8, bottom=0.1, top=0.9, hspace=0.3)
+        n_simulations = len(strategies)
+        n_generations = strategies[0].shape[1]
+        strategy_distributions = np.zeros(shape=(len(STRATEGY_IDS), n_generations, n_simulations))
+        for i in range(n_simulations):
+            for j in range(n_generations):
+                for k in range(len(STRATEGY_IDS)):
+                    indices = np.where(strategies[i][:,j] == k)[0]
+                    strategy_distributions[k, j, i] = len(indices)
+        strategy_means = np.mean(strategy_distributions, axis=2)
+        strategy_stds = np.std(strategy_distributions, axis=2)
+        lower = np.maximum(strategy_means - strategy_stds,0)
+        upper = strategy_means + strategy_stds
+        for i, means in enumerate(strategy_means):
+            plt.fill_between(np.arange(n_generations), lower[i,:], upper[i,:], alpha=0.3)
+            plt.plot(np.arange(n_generations), means, alpha=0.8, label=STRATEGY_IDS[i])
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.xlabel('nth_generation')
+        plt.ylabel('Share of Strategy (%)')
+        plt.xticks(np.arange(n_generations+1, step=50))
+        plt.title('Average Distribution of Strategies over Generations')
+        plt.show()
+
+
