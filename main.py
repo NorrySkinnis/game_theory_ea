@@ -21,7 +21,7 @@ if __name__ == '__main__':
     n_players = [50] # must be even
     n_matchups = [30]
     n_games = [20]
-    n_generations = [50]
+    n_generations = [100]
 
     # Set simulation hyperparameters
     memory_capacity = [3, 2, 3]

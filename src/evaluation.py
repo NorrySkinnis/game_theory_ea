@@ -122,13 +122,15 @@ class Evaluator:
         lower = np.maximum(strategy_means - strategy_stds,0)
         upper = strategy_means + strategy_stds
         for i, means in enumerate(strategy_means):
-            plt.fill_between(np.arange(n_generations), lower[i,:], upper[i,:], alpha=0.3)
+            if np.max(means) <= 7: # Ignore strategies that make up below 5% of the population
+                continue
+            plt.fill_between(np.arange(n_generations), lower[i,:], upper[i,:], alpha=0.2)
             plt.plot(np.arange(n_generations), means, alpha=0.8, label=STRATEGY_IDS[i])
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.xlabel('nth_generation')
         plt.ylabel('Share of Strategy (%)')
         plt.xticks(np.arange(n_generations+1, step=50))
         plt.title('Average Distribution of Strategies over Generations')
-        plt.show()
+        plt.savefig('.png',bbox_inches='tight')
 
 
