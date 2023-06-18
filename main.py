@@ -22,9 +22,9 @@ if __name__ == '__main__':
     fitness = lambda x, t: np.power(1, t) * np.sum(x)
 
     # Set simulation parameters
-    n_players = 50 # must be even
+    n_players = 100 # must be even
     n_generations = 100
-    n_matchups = 20
+    n_matchups = 60
     n_games = 30
 
     # Set simulation hyperparameters
@@ -57,10 +57,4 @@ if __name__ == '__main__':
 
         evaluator.plot_average_fitness()
         evaluator.plot_average_strategies()
-
-        break
-        
-
-    # Used printing out the codes of the undetermined strategies
-
 
