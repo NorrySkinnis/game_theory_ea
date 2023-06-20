@@ -46,8 +46,7 @@ class StrategyDetector:
 		keys = [c for c in range(1, MAX_MEMORY_CAPACITY+1)]
 		permutations = {key: None for key in keys}
 		for c in range(1,MAX_MEMORY_CAPACITY+1):
-			permutations[c] = np.array(list(product([-1,1], repeat=c)))
-			# permutations[c] = np.array(list(product([0,1], repeat=c)))
+			permutations[c] = np.vstack((np.array(list(product([-1,1], repeat=c))), [0]*c)) 
 		return permutations
 
 	def detect_strategy(self, player: Player, verbose: bool) -> None:

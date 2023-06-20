@@ -13,6 +13,7 @@ sys.path.append(module_path)
 # Custom imports
 from environment import Environment
 from evaluation import Evaluator 
+from strategy_detector import StrategyDetector
 
 
 if __name__ == '__main__':
@@ -23,12 +24,12 @@ if __name__ == '__main__':
 
     # Set simulation parameters
     n_players = 100 # must be even
-    n_generations = 100
+    n_generations = 200
     n_matchups = 60
     n_games = 30
 
     # Set simulation hyperparameters
-    memory_capacity = [1, 2, 3]
+    memory_capacity = [1, 2]
     elite = [0.1, 0.5, 0.95]
     mutation_rate = [0.1, 0.5, 1]
     crossover_rate = [0, 0.3, 0.6]
@@ -48,13 +49,14 @@ if __name__ == '__main__':
             simulation = Environment(*setting, payoff_matrix=payoff_matrix, fitness=fitness)
             simulation.attach(evaluator)
             simulation.run(verbose=False)
-            # # Get codes of undetermined strategies
-            # unknown = simulation.detector.undetermined_strategies
-            # strategy_count = Counter(frozenset(s) for s in unknown)
-            # print(strategy_count)
+            # Get codes of undetermined strategies
+            unknown = simulation.detector.undetermined_strategies
+            strategy_count = Counter(frozenset(s) for s in unknown)
+            print(strategy_count)
             evaluator.plot_fitness()
             evaluator.plot_strategies()
 
         evaluator.plot_average_fitness()
         evaluator.plot_average_strategies()
+        break
 
