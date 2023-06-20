@@ -12,26 +12,45 @@ from constants import MAX_MEMORY_CAPACITY
 
 
 class Environment:
-    """Creates an environment for the IPD game.
-    
-    Supplies players, simulation, and evaluation."""
+    """Creates an environment for the IPD game."""
 
-    def __init__(self, n_players: int, n_matchups: int, n_games: int, n_generations: int, memory_capacity: int, 
-                 elite: float, mutation_rate:float, crossover:bool, crossover_p:float, fitness=lambda x, t: np.power(1, t) * np.sum(x)):
-        self.payoff_matrix = np.array([[(3, 3), (0, 5)], [(5, 0), (1, 1)]])
+    def __init__(self, n_players: int, n_generations: int, n_matchups: int, n_games: int, memory_capacity: int, 
+                 elite: float, mutation_rate: float, crossover_rate: float, payoff_matrix: np.ndarray, fitness: callable):
+        self.n_generations = n_generations
         self.n_matchups = n_matchups
         self.n_games = n_games
-        self.n_generations = n_generations
         self.elite = elite
         self.mutation_rate = mutation_rate
-        self.crossover = crossover
-        self.crossover_p = crossover_p
+        self.crossover_rate = crossover_rate
+        self.payoff_matrix = payoff_matrix
         self.fitness = fitness 
-        self.players = [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players)] # + [Player(identifier=i, n_matchups=n_matchups, n_games=n_games, memory_capacity=memory_capacity) for i in range(n_players//2, n_players)]
+        self.players = self.initialize_players(n_players=n_players, memory_capacity=memory_capacity)
         self.detector = StrategyDetector()
-        self.evaluator = Evaluator(players=self.players, n_generations=n_generations, payoff_matrix=self.payoff_matrix,
-                                   n_games=self.n_games, n_matchups=self.n_matchups, mutation_rate=self.mutation_rate,
-                                   memory_capacity=memory_capacity)
+    
+    def initialize_players(self, n_players: int, memory_capacity: int) -> list[Player]:
+        """Initializes the players of the environment.
+
+        Parameters:
+        -----------
+        n_players: (int)
+            Number of players in the population.
+        
+        memory_capacity: (int)
+            Number of previous games to be remembered by the player.
+        """
+        return [Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, memory_capacity=memory_capacity) 
+                for id in range(n_players)]
+    
+    def attach(self, evaluator: Evaluator) -> None:
+        """Attaches an evaluator to the environment.
+
+        Parameters:
+        -----------
+        evaluator: (Evaluator)
+            Evaluator to be attached.
+        """
+        evaluator.nth_simulation += 1
+        self.evaluator = evaluator
 
     def run(self, verbose=False) -> None:
         """ 
@@ -40,21 +59,19 @@ class Environment:
         verbose: (bool)
             If True, prints information about the game.
         """
-        for gen_i in tqdm(range(self.n_generations)):
+        for nth_generation in tqdm(range(self.n_generations)):
 
             if verbose:
-                print(f'----------------------------\nGENERATION {gen_i+1}')
+                print(f'----------------------------\nGENERATION {nth_generation+1}')
 
             matchups = self.sample_matchups()
             for p in self.players:
                 # Ignore entries with -1, which means no matchup
                 opponent_ids = matchups[matchups[:, p.identifier] >= 0, p.identifier]
                 self.simulate_game(player=p, opponent_ids=opponent_ids, verbose=verbose)
-                player_strategy = self.detector.detect_strategy(player=p, verbose=verbose)
-                self.evaluator.update(player=p, nth_generation=gen_i, player_strategy=player_strategy)           
+                self.detector.detect_strategy(player=p, verbose=verbose)
+                self.evaluator.update(player=p, nth_generation=nth_generation)           
             self.evolve()
-        self.evaluator.plot_fitness()
-        self.evaluator.plot_strategies()   
 
     def evolve(self) -> None:
         """ Evolve generation of players by selecting the fittest individuals 
@@ -72,19 +89,18 @@ class Environment:
         new_players = []
         # Create new players until all ids are used
         for id in available_ids:
-            # Select two random parents from elite. Only use second if crossover is enabled
+            # Select two random parents from elite.
             parent_indeces = random.sample(set(range(index)), 2)
             parent1 = self.players[parent_indeces[0]]
+            parent2 = self.players[parent_indeces[1]]
+            # Create child and a dummy child to crossover with
             child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, 
                            memory_capacity=parent1.memory_capacity)
+            dummy_child = Player(identifier=id, n_matchups=self.n_matchups, n_games=self.n_games, 
+                                 memory_capacity=parent2.memory_capacity)  
             child.brain = copy.deepcopy(parent1.brain)
-            # If crossover is enabled, then create dummy child and perform crossover
-            if self.crossover:
-                parent2 = self.players[parent_indeces[1]]
-                dummy_child = Player(identifier=id, n_matchups=self.n_matchups, 
-                                     n_games=self.n_games, memory_capacity=parent2.memory_capacity)  
-                dummy_child.brain = copy.deepcopy(parent2.brain)
-                child.brain.crossover(other=dummy_child.brain, crossover_p=self.crossover_p)
+            dummy_child.brain = copy.deepcopy(parent2.brain)
+            child.brain.crossover(other=dummy_child.brain, crossover_rate=self.crossover_rate)
             # Mutate brain of child
             child.brain.mutate(mutation_rate=self.mutation_rate)
             # One child policy. 
@@ -92,9 +108,9 @@ class Environment:
         # Create new generation
         self.players[index:] = new_players
         # Reset player information and ids. Ids HAVE to be sorted ascending in new list
-        for i, p in enumerate(self.players):
+        for id, p in enumerate(self.players):
             p.reset()
-            p.identifier = i
+            p.identifier = id
     
     def sample_matchups(self) -> np.ndarray:
         """ Samples matchups for each player. Currently, with replacement."""

@@ -20,7 +20,7 @@ class StrategyDetector:
 	
 	Example: 
 	--------
-	Memory capacity = 1: -1 -> C, 1 -> D
+	Memory capacity = 1, -1 := cooperate, 1 := defect
 
 	Possible inputs: [-1], [1]
 	
@@ -35,7 +35,7 @@ class StrategyDetector:
 		self.strategy = self.set_strategy()
 		self.undetermined_strategies = []
 
-	def set_strategy(self)->dict[int, np.ndarray]:
+	def set_strategy(self) -> dict[int, np.ndarray]:
 		"""Constructs a dictionary of all possible input combinations for each memory capacity.
 		
 		Returns:
@@ -46,11 +46,10 @@ class StrategyDetector:
 		keys = [c for c in range(1, MAX_MEMORY_CAPACITY+1)]
 		permutations = {key: None for key in keys}
 		for c in range(1,MAX_MEMORY_CAPACITY+1):
-			permutations[c] = np.array(list(product([-1,1], repeat=c)))
-			# permutations[c] = np.array(list(product([0,1], repeat=c)))
+			permutations[c] = np.vstack((np.array(list(product([-1,1], repeat=c))), [0]*c)) 
 		return permutations
 
-	def detect_strategy(self, player:Player, verbose:bool)->int:
+	def detect_strategy(self, player: Player, verbose: bool) -> None:
 		"""Detector plays all possible input combination for the current player.
 		
 		Constructs unique code from the inputs for which the player defected.
@@ -88,7 +87,7 @@ class StrategyDetector:
 		self.player_strategy_code = player_code
 		# Determine player strategy from player code
 		player_strategy = self.strategy_from_code(memory_capacity=memory_capacity)
-		return player_strategy
+		player.strategy = player_strategy
 
 	def strategy_from_code(self, memory_capacity:int)->int:
 		"""Determines the player's strategy from the player code.
@@ -111,4 +110,4 @@ class StrategyDetector:
 				return strategy_id
 		# Record undetermined strategies
 		self.undetermined_strategies.append(self.player_strategy_code)
-		return list(STRATEGY_IDS.keys())[-1]
+		return list(STRATEGY_IDS[memory_capacity].keys())[-1]

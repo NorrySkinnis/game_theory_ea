@@ -10,28 +10,25 @@ from constants import STRATEGY_IDS
 
 class Evaluator:
     """ Creates the functionality to book keep players' rewards, memory capacities, and strategies over generations."""
+    def __init__(self, n_players: int, n_generations: int, n_matchups: int, n_games: int, memory_capacity :int, elite: float, 
+                 mutation_rate: float, crossover_rate: float, n_simulations: int, payoff_matrix: np.ndarray):
 
-    def __init__(self, players:list[Player], n_generations:int, n_games:int, n_matchups:int, memory_capacity:int,
-                 mutation_rate:float, payoff_matrix:np.ndarray):
-        self.players = players
-        self.n_generations = n_generations
-        self.n_games = n_games
-        self.n_matchups = n_matchups
-        self.payoff_matrix = payoff_matrix
-        self.mutation_rate = mutation_rate
-        self.memory_capacity = memory_capacity
-        
-        # Initializes data structure for book keeping
-        shape = (len(players), n_generations)
-        self.rewards_per_gen = np.zeros(shape)
+        self.nth_simulation = -1
+        shape = (n_simulations, n_players, n_generations)
+        self.reward_data = np.zeros(shape)
         self.strategy_data = np.zeros(shape)
-        self.memory_capacities_per_gen = np.zeros(shape)
-
+        self.environment_data = {'n_players': n_players, 
+                                 'n_generations': n_generations, 
+                                 'n_matchups': n_matchups, 
+                                 'n_games': n_games,
+                                 'memory_capacity': memory_capacity,
+                                 'payoff_matrix': payoff_matrix}
+        self.file_id = f'mc_{memory_capacity}_e_{elite}_mr_{mutation_rate}_cr_{crossover_rate}'
         if not os.path.isdir("./src/figures"):
             os.mkdir("./src/figures")
 
-    def update(self, player: Player, nth_generation: int, player_strategy: int) -> None:
-        """Triggers snapshot of players' rewards, memory capacities, strategy at nth generation.
+    def update(self, player: Player, nth_generation: int) -> None:
+        """Notifies evaluator of changes in environment state.
         
         Parameters:
         -----------
@@ -40,21 +37,21 @@ class Evaluator:
         
         nth_generation: (int)
             Current generation.
-        
-        player_strategy: (int)
-            Id of player's strategy.
         """ 
-        self.rewards_per_gen[player.identifier,nth_generation] = player.reward
-        self.strategy_data[player.identifier, nth_generation] = player_strategy
-        self.memory_capacities_per_gen[player.identifier,nth_generation] = player.memory_capacity
+        self.reward_data[self.nth_simulation, player.identifier, nth_generation] = player.reward
+        self.strategy_data[self.nth_simulation, player.identifier, nth_generation] = player.strategy
 
     def plot_fitness(self):
-        """Plots fitness dynamics after simulation is finished."""
-        gens = np.arange(self.n_generations)
-        max_reward = np.max(self.rewards_per_gen, axis=0)
-        min_reward = np.min(self.rewards_per_gen, axis=0)
-        mean_reward = np.mean(self.rewards_per_gen, axis=0)
-        legend = []
+        """Plots fitness dynamics of current population over generations."""
+        n_generations = self.environment_data['n_generations']
+        n_games = self.environment_data['n_games']
+        n_matchups = self.environment_data['n_matchups']
+        payoff_matrix = self.environment_data['payoff_matrix']
+        nth_simulation = self.nth_simulation
+        reward_data = self.reward_data[nth_simulation,:,:]
+        max_reward = np.max(reward_data, axis=0)
+        min_reward = np.min(reward_data, axis=0)
+        mean_reward = np.mean(reward_data, axis=0)
         # Plot min, max, avg of fitness
         plt.figure()
         plt.plot(gens, max_reward, label='Max', c='b')
@@ -75,31 +72,108 @@ class Evaluator:
         double_betray_reward = self.payoff_matrix[1][1][1]
         plt.hlines(y=double_betray_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = ':', color='gray')
         legend.append('all D threshold')
+
         plt.title('Fitness of Players over Generations')
         plt.xlabel('nth_generation')
         plt.ylabel('Fitness')
-        plt.legend(legend)
-        plt.savefig(f'src/figures/fitness_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
-            f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png', bbox_inches='tight')
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        filepath = f'./src/figures/fitness/fit_sim_{self.nth_simulation}_{self.file_id}.png'
+        plt.savefig(filepath, bbox_inches='tight')
+        plt.close()
+
+    def plot_average_fitness(self):
+        n_generations = self.environment_data['n_generations']
+        n_games = self.environment_data['n_games']
+        n_matchups = self.environment_data['n_matchups']
+        payoff_matrix = self.environment_data['payoff_matrix']
+        reward_data = self.reward_data
+        max_reward = np.max(reward_data, axis=(1,0), keepdims=True).reshape(-1)
+        min_reward = np.min(reward_data, axis=(1,0), keepdims=True).reshape(-1)
+        mean_reward = np.mean(reward_data, axis=(0,1), keepdims=True).reshape(-1)
+        # Plot min, max, avg of fitness
+        generations = np.arange(n_generations)
+        plt.figure(figsize=(10,4))
+        plt.subplots_adjust(left=0.1, right=0.8, bottom=0.1, top=0.9, hspace=0.3)
+        plt.plot(generations, mean_reward, label='pop. average', color='orange', alpha=1)
+        plt.fill_between(generations, min_reward, max_reward, alpha=0.3, color='silver', label='ind. min-max')
+        # Maximum reward that can be achieved by an individual
+        plt.hlines(y=np.max(payoff_matrix) * n_games * n_matchups, xmin=0, xmax=n_generations-1, 
+                   label='ind. optimum', linestyle = '--', color='dodgerblue')
+        # Plot all friends fitness threshold
+        coop_reward = payoff_matrix[0][0][0]
+        plt.hlines(y=coop_reward * n_games * n_matchups, xmin=0, xmax=n_generations-1, 
+                   label='pop. optimum', linestyle = '--', color='springgreen')
+        plt.title('Average Fitness of Players over Generations')
+        plt.xlabel('nth_generation')
+        plt.ylabel('Fitness')
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        filepath = f'./src/figures/fitness/fit_avg_{self.file_id}.png'
+        plt.savefig(filepath, bbox_inches='tight')
+        plt.close()
 
     def plot_strategies(self):
-        """ Plot the distribution of strategies over generations."""
-        plt.figure()
-        n_generations = self.n_generations
-        strategy_distributions = np.zeros(shape=(len(STRATEGY_IDS), n_generations))
+        """ Plots distribution dynamics for a single simulation."""
+        plt.figure(figsize=(10,4))
+        plt.subplots_adjust(left=0.1, right=0.8, bottom=0.1, top=0.9, hspace=0.3)
+        n_generations = self.environment_data['n_generations']
+        memory_capacity = self.environment_data['memory_capacity']
+        strategy_distributions = np.zeros(shape=(len(STRATEGY_IDS[memory_capacity]), n_generations))
+        played_strategies = set()
         for i in range(n_generations):
-            strategies = self.strategy_data[:,i]
-            for j in range(len(STRATEGY_IDS)):
+            strategies = self.strategy_data[self.nth_simulation,:,i]
+            for j in range(len(STRATEGY_IDS[memory_capacity])):
                 indices = np.where(strategies == j)[0]
+                if len(indices) > 0:
+                    played_strategies.add(j)
                 strategy_distributions[j, i] = len(indices)
-        plt.stackplot(np.arange(n_generations), strategy_distributions, labels=STRATEGY_IDS.values())
+        strategy_distributions = strategy_distributions[np.any(strategy_distributions !=0, axis=1)]
+        plt.stackplot(np.arange(n_generations), strategy_distributions, 
+                      labels=list(map(STRATEGY_IDS[memory_capacity].get, list(played_strategies))))
         plt.title(f'Distribution of Strategies over Generations')
         plt.xlabel('nth_generation')
         plt.ylabel(f'Share of Strategies in Population')
         plt.margins(x=0)
         plt.margins(y=0)
         plt.yticks([])
+        plt.xticks(np.arange(n_generations+1, step=25))
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.savefig(f'src/figures/strats_gen{self.n_generations}_p{len(self.players)}_m{self.n_matchups}'
-        f'_g{self.n_games}_mem{self.memory_capacity}_mut{self.mutation_rate}.png',
-                    bbox_inches='tight')
+        filepath = f'./src/figures/strategies/stgs_sim_{self.nth_simulation}_{self.file_id}.png'
+        plt.savefig(filepath, bbox_inches='tight')
+        plt.close()
+    
+    def plot_average_strategies(self) -> None:
+        """ Plots the average of strategies across multiple runs of the same simulation."""
+        plt.figure(figsize=(10,4))
+        plt.subplots_adjust(left=0.1, right=0.8, bottom=0.1, top=0.9, hspace=0.3)
+        n_players = self.environment_data['n_players']
+        memory_capacity = self.environment_data['memory_capacity']
+        n_simulations = self.strategy_data.shape[0]
+        n_generations = self.strategy_data.shape[2]
+        strategy_data = self.strategy_data
+        strategy_distributions = np.zeros(shape=(len(STRATEGY_IDS[memory_capacity]), n_generations, n_simulations))
+        for i in range(n_simulations):
+            for j in range(n_generations):
+                for k in range(len(STRATEGY_IDS[memory_capacity])):
+                    indices = np.where(strategy_data[i,:,j] == k)[0]
+                    strategy_distributions[k, j, i] = len(indices)
+        strategy_means = np.mean(strategy_distributions, axis=2)/n_players*100
+        # strategy_stds = np.std(strategy_distributions, axis=2)/n_players*100
+        # lower = np.maximum(strategy_means - strategy_stds, 0)
+        # upper = np.minimum(strategy_means + strategy_stds, 100)
+        for i, means in enumerate(strategy_means):
+            if memory_capacity == 3:
+                if np.max(means) <= 15: # Ignore strategies with peak below 15%
+                    continue
+            # plt.fill_between(np.arange(n_generations), lower[i,:], upper[i,:], alpha=0.2)
+            plt.plot(np.arange(n_generations), means, alpha=0.8, label=STRATEGY_IDS[memory_capacity][i])
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.xlabel('nth_generation')
+        plt.ylabel('Share of Strategy (%)')
+        plt.yticks(np.arange(100+1, step=20))
+        plt.xticks(np.arange(n_generations+1, step=25))
+        plt.title('Average Distribution of Strategies over Generations')
+        filepath = f'./src/figures/strategies/avg_stgs_{self.file_id}.png'
+        plt.savefig(filepath, bbox_inches='tight')
+        plt.close()
+
+

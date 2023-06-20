@@ -2,6 +2,8 @@
 import sys
 import os
 from collections import Counter
+import itertools
+import numpy as np
 
 # Sets correct path for imports
 script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -9,38 +11,52 @@ module_path = os.path.join(script_directory, 'src')
 sys.path.append(module_path)
 
 # Custom imports
-from environment import Environment 
-from constants import MAX_MEMORY_CAPACITY
+from environment import Environment
+from evaluation import Evaluator 
+from strategy_detector import StrategyDetector
+
 
 if __name__ == '__main__':
 
+    # Set payoff matrix and fitness function
+    payoff_matrix = np.array([[(3, 3), (0, 5)], [(5, 0), (1, 1)]])
+    fitness = lambda x, t: np.power(1, t) * np.sum(x)
+
     # Set simulation parameters
-    n_games = 10
-    n_matchups = 30
-    n_generations = 50
-    n_players = 50
+    n_players = 100 # must be even
+    n_generations = 200
+    n_matchups = 60
+    n_games = 30
 
     # Set simulation hyperparameters
-    elite = 0.5
-    crossover = True
-    crossover_p= 0.5
-    memory_capacity = 3
-    mutation_rate = 0.6
+    memory_capacity = [1, 2]
+    elite = [0.1, 0.5, 0.95]
+    mutation_rate = [0.1, 0.5, 1]
+    crossover_rate = [0, 0.3, 0.6]
 
-    # Check if parameters are valid
-    assert n_players > 1 and n_players % 2 == 0, 'n_players must be even and larger than 1'
-    assert memory_capacity <= MAX_MEMORY_CAPACITY and memory_capacity > 0, f'memory_capacity must be between 1 and {MAX_MEMORY_CAPACITY}'
+    # Create permutations of settings
+    sim_settings = itertools.product([n_players], [n_generations], [n_matchups], [n_games],
+                                     memory_capacity, elite, mutation_rate, crossover_rate)
     
-    # Create and run simulation
-    env = Environment(n_players=n_players, n_games=n_games, n_matchups=n_matchups, mutation_rate=mutation_rate,
-                      n_generations=n_generations, elite=elite, crossover=crossover, crossover_p=crossover_p,
-                      memory_capacity=memory_capacity)
+    # Iterate over simulation settings and run simulations n times
+    n_simulations = 10
+    for setting in sim_settings:
 
-    env.run(verbose=False)
+        evaluator = Evaluator(*setting, n_simulations=n_simulations, payoff_matrix=payoff_matrix)
+        
+        for _ in range(n_simulations):
 
-    # Used printing out the codes of the undetermined strategies
+            simulation = Environment(*setting, payoff_matrix=payoff_matrix, fitness=fitness)
+            simulation.attach(evaluator)
+            simulation.run(verbose=False)
+            # Get codes of undetermined strategies
+            unknown = simulation.detector.undetermined_strategies
+            strategy_count = Counter(frozenset(s) for s in unknown)
+            print(strategy_count)
+            evaluator.plot_fitness()
+            evaluator.plot_strategies()
 
-    # unknown = env.detector.undetermined_strategies
-    # strategy_count = Counter(frozenset(s) for s in unknown)
-    # print(strategy_count)
+        evaluator.plot_average_fitness()
+        evaluator.plot_average_strategies()
+        break
 

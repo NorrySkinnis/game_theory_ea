@@ -1,24 +1,96 @@
-STRATEGY_IDS = {  0: 'Dove',
-                  1: 'TFT',
-                  2: 'Hawk',
-                  3: 'RTFT', # Reverse TFT
-                  4: 'GT', # Grim Trigger 
-                  # 5: 'LR', # Limited Retaliation {1, 2, 3, 5, 6, 7}
-                  # 6: 'SGT', # Soft Grim Trigger {1, 3, 4, 5, 6, 7}
-                  # 7: 'CTFT', # Cautious TFT {0, 1, 3, 5, 7}
-                  # 8: 'WSLS', # Win-Stay Lose-Shift {1, 2, 3, 4, 5}
-                  5: '{5,7}', # Unknown
-                  6: '{4,5,6,7}', # Unknown
-                  7: '{0,2,3,4,6,7}', # Unknown
-                  8: '{0,4,5,6,7}',
-                  9: 'Undetermined'}
+STRATEGY_IDS = {1:{0:'Dove', 
+                   1:'TFT', 
+                   2:'CTFT', 
+                   3:'Hawk', 
+                   4:'RTFT',
+                   5:'CRTFT', 
+                   6:'Undetermined'},
+                2:{0:'Dove', 
+                   1:'TFT', 
+                   2:'CTFT', 
+                   3:'Hawk', 
+                   4:'RTFT', 
+                   5:'GT', 
+                   6:'{0,2,3,4}', 
+                   7:'{0,2,3}',
+                   8:'{3}', 
+                   9:'{2,3}',
+                   10:'{2,3,4}', 
+                   11:'Undetermined'},
+                3:{0:'Dove', 
+                   1:'TFT', 
+                   2:'CTFT', 
+                   3:'Hawk', 
+                   4:'RTFT', 
+                   5:'GT', 
+                   6:'LR', 
+                   7:'SGT', 
+                   8:'OTFT', 
+                   9:'AFF', 
+                   10:'MR', 
+                   11:'{0,2,3,4,6,7}', 
+                   12:'{0,4,5,6,7}', 
+                   13:'{0,1,2,4,5,6,7}', 
+                   14:'{0,2,4,5,6,7}', 
+                   15:'OPP', 
+                   16:'{0,1,4,5,6,7}', 
+                   17:'{4,6,7}', 
+                   18:'{5,6,7}', 
+                   19:'{4,5,7}', 
+                   20:'Undetermined'}
+                }
 
-STRATEGY_CODES = { 1: [set(), {1}, {0, 1}, {0}], 
-                   2: [set(), {1, 3}, {0, 1, 2, 3}, {0, 2}, {1, 2, 3}],
-                   3: [set(), {1, 3, 5, 7}, {0, 1, 2, 3, 4, 5, 6, 7}, 
-                       {0, 2, 4, 6}, {1, 2, 3, 4, 5, 6, 7}, {5, 7},
-                       {4, 5, 6, 7}, {0, 2, 3, 4, 6, 7},{0, 4, 5, 6, 7}]}
+# CTFT: Cautious TFT (Starts with D, then TFT)
+# CRFTF: Cautious Reverse TFT (Starts with D, then RTFT)
+# GT: Grim Trigger
+# RTFT: Reverse TFT
+# LR: Limited Retaliation
+# SGT: Soft Grim Trigger
+# AFF: Anti Flip Flop
+# OPP: Opportunist
+# OTFT: Opportunistic TFT (D)
+# MR: Memory Retatliation
+        
+STRATEGY_CODES = {1: [set(), 
+                      {1}, 
+                      {1, 2}, 
+                      {0, 1, 2}, 
+                      {0},
+                      {0, 2}], 
+                  2: [set(), 
+                      {1, 3}, 
+                      {1, 3, 4}, 
+                      {0, 1, 2, 3, 4}, 
+                      {0, 2}, 
+                      {1, 2, 3}, 
+                      {0, 2, 3, 4}, 
+                      {0, 2, 3},
+                      {2, 3, 4},                       
+                      {3}, 
+                      {2, 3}],
+                  3: [set(), 
+                      {1, 3, 5, 7}, 
+                      {1, 3, 5, 7, 8}, 
+                      {0, 1, 2, 3, 4, 5, 6, 7, 8}, 
+                      {0, 2, 4, 6},
+                      {1, 2, 3, 4, 5, 6, 7}, 
+                      {1, 2, 3, 5, 6, 7},
+                      {1, 3, 4, 5, 6, 7}, 
+                      {0, 1, 3, 5, 7}, 
+                      {5, 7}, 
+                      {4, 5, 6, 7},
+                      {0, 2, 3, 4, 6, 7}, 
+                      {0, 4, 5, 6, 7},
+                      {0, 1, 2, 4, 5, 6, 7}, 
+                      {0, 2, 4, 5, 6, 7}, 
+                      {0, 1, 2, 3, 4, 6, 7}, 
+                      {0, 1, 4, 5, 6, 7}, 
+                      {4, 6, 7}, 
+                      {5, 6, 7},
+                      {4, 5, 7}]}
 
 MAX_MEMORY_CAPACITY = 3
+
+
 
 
