@@ -53,18 +53,26 @@ class Evaluator:
         min_reward = np.min(reward_data, axis=0)
         mean_reward = np.mean(reward_data, axis=0)
         # Plot min, max, avg of fitness
-        generations = np.arange(n_generations)
-        plt.figure(figsize=(10,4))
-        plt.subplots_adjust(left=0.1, right=0.8, bottom=0.1, top=0.9, hspace=0.3)
-        plt.plot(generations, mean_reward, label='pop. average', color='orange', alpha=1)
-        plt.fill_between(generations, min_reward, max_reward, alpha=0.3, color='silver', label='ind. min-max')
-        # Maximum reward that can be achieved by an individual
-        plt.hlines(y=np.max(payoff_matrix) * n_games * n_matchups, xmin=0, xmax=n_generations-1, 
-                   label='ind. optimum', linestyle = '--', color='dodgerblue')
-        # Plot all friends fitness threshold
-        coop_reward = payoff_matrix[0][0][0]
-        plt.hlines(y=coop_reward * n_games * n_matchups, xmin=0, xmax=n_generations-1, 
-                   label='pop. optimum', linestyle = '--', color='springgreen')
+        plt.figure()
+        plt.plot(gens, max_reward, label='Max', c='b')
+        legend.append('max')
+        plt.plot(gens, mean_reward, label='Avg', c='r')
+        legend.append('avg')
+        plt.plot(gens, min_reward, label='Min', c='b')
+        legend.append('min')
+        # Plot max theoretical fitness
+        betray_reward = np.max(self.payoff_matrix)
+        plt.hlines(y=betray_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = '--', color='gray')
+        legend.append('theoretical max')
+        # Plot best friends fitness threshold
+        coop_reward = self.payoff_matrix[0][0][0]
+        plt.hlines(y=coop_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = '-.', color='gray')
+        legend.append('all C threshold')
+        # Plot hostile environment fitness threshold
+        double_betray_reward = self.payoff_matrix[1][1][1]
+        plt.hlines(y=double_betray_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = ':', color='gray')
+        legend.append('all D threshold')
+
         plt.title('Fitness of Players over Generations')
         plt.xlabel('nth_generation')
         plt.ylabel('Fitness')
