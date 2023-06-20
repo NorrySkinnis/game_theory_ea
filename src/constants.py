@@ -49,7 +49,7 @@ STRATEGY_IDS = {1:{0:'Dove',
 # AFF: Anti Flip Flop
 # OPP: Opportunist
 # OTFT: Opportunistic TFT (D)
-# MR: Memory Retatliation
+# MR: Memory Retaliation
         
 STRATEGY_CODES = {1: [set(), 
                       {1}, 

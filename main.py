@@ -24,15 +24,20 @@ if __name__ == '__main__':
 
     # Set simulation parameters
     n_players = 100 # must be even
-    n_generations = 200
+    n_generations = 15
     n_matchups = 60
-    n_games = 30
+    n_games = 15
 
     # Set simulation hyperparameters
-    memory_capacity = [1, 2]
-    elite = [0.1, 0.5, 0.95]
-    mutation_rate = [0.1, 0.5, 1]
-    crossover_rate = [0, 0.3, 0.6]
+    # memory_capacity = [1, 2]
+    # elite = [0.1, 0.5, 0.95]
+    # mutation_rate = [0.1, 0.5, 1]
+    # crossover_rate = [0, 0.3, 0.6]
+
+    memory_capacity = [2]
+    elite = [0.5]
+    mutation_rate = [0.1]
+    crossover_rate = [0] 
 
     # Create permutations of settings
     sim_settings = itertools.product([n_players], [n_generations], [n_matchups], [n_games],
