@@ -57,20 +57,24 @@ class Evaluator:
         legend = []
         # Plot min, max, avg of fitness
         plt.figure()
-        plt.plot(gens, max_reward, label='Max', c='m')
+        plt.plot(gens, max_reward, label='Max', c='b')
         legend.append('max')
         plt.plot(gens, mean_reward, label='Avg', c='r')
         legend.append('avg')
-        plt.plot(gens, min_reward, label='Min', c='m')
+        plt.plot(gens, min_reward, label='Min', c='b')
         legend.append('min')
         # Plot max theoretical fitness
         betray_reward = np.max(self.payoff_matrix)
         plt.hlines(y=betray_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = '--', color='gray')
         legend.append('theoretical max')
-        # Plot all friends fitness threshold
+        # Plot best friends fitness threshold
         coop_reward = self.payoff_matrix[0][0][0]
         plt.hlines(y=coop_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = '-.', color='gray')
         legend.append('all C threshold')
+        # Plot hostile environment fitness threshold
+        double_betray_reward = self.payoff_matrix[1][1][1]
+        plt.hlines(y=double_betray_reward * self.n_games * self.n_matchups, xmin=0, xmax=self.n_generations-1, linestyle = ':', color='gray')
+        legend.append('all D threshold')
         plt.title('Fitness of Players over Generations')
         plt.xlabel('nth_generation')
         plt.ylabel('Fitness')

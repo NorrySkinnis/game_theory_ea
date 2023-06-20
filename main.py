@@ -15,10 +15,10 @@ from constants import MAX_MEMORY_CAPACITY
 if __name__ == '__main__':
 
     # Set simulation parameters
-    n_games = 30
-    n_matchups = 70
-    n_generations = 200
-    n_players = 100
+    n_games = 10
+    n_matchups = 30
+    n_generations = 50
+    n_players = 50
 
     # Set simulation hyperparameters
     elite = 0.5
