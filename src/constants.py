@@ -14,8 +14,8 @@ STRATEGY_IDS = {1:{0:'Dove',
                    6:'{0,2,3,4}', 
                    7:'{0,2,3}',
                    8:'{3}', 
-                   9:'{2,3}',
-                   10:'{2,3,4}', 
+                   9:'{2,3}', # Silent grudge: when betrayed, will wait 1 turn and then betray back (is this the same as memory retaliation?)
+                   10:'{2,3,4}', # Cautious silent grudge
                    11:'Undetermined'},
                 3:{0:'Dove', 
                    1:'TFT', 
