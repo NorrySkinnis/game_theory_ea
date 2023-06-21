@@ -50,7 +50,7 @@ class StrategyDetector:
 			idle_states = []
 			for i in range(0, c):
 				inputs = np.vstack(np.array(list(product([-1,1], repeat=i))))
-				# 0-padding at the beginning of the list until the list is the size of the memory capacity
+				# 0-padding at the beginning of the lis t until the list is the size of the memory capacity
 				for input in inputs:
 					idle_states.append(np.append(np.array([0] * (c-i)), input))
 			# concat regular input with idle and semi idle input
