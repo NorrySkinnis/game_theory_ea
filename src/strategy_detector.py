@@ -46,7 +46,15 @@ class StrategyDetector:
 		keys = [c for c in range(1, MAX_MEMORY_CAPACITY+1)]
 		permutations = {key: None for key in keys}
 		for c in range(1,MAX_MEMORY_CAPACITY+1):
-			permutations[c] = np.vstack((np.array(list(product([-1,1], repeat=c))), [0]*c)) 
+			# add idle and semi idle states to possible inputs
+			idle_states = []
+			for i in range(0, c):
+				inputs = np.vstack(np.array(list(product([-1,1], repeat=i))))
+				# 0-padding at the beginning of the list until the list is the size of the memory capacity
+				for input in inputs:
+					idle_states.append(np.append(np.array([0] * (c-i)), input))
+			# concat regular input with idle and semi idle input
+			permutations[c] = np.vstack((np.array(list(product([-1,1], repeat=c))), np.array(idle_states).astype(int))) 
 		return permutations
 
 	def detect_strategy(self, player: Player, verbose: bool) -> None:

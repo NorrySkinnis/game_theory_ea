@@ -24,27 +24,27 @@ if __name__ == '__main__':
 
     # Set simulation parameters
     n_players = 100 # must be even
-    n_generations = 15
+    n_generations = 150
     n_matchups = 60
     n_games = 15
 
     # Set simulation hyperparameters
-    # memory_capacity = [1, 2]
-    # elite = [0.1, 0.5, 0.95]
-    # mutation_rate = [0.1, 0.5, 1]
-    # crossover_rate = [0, 0.3, 0.6]
+    memory_capacity = [1, 2]
+    elite = [0.1, 0.5, 0.95]
+    mutation_rate = [0.1, 0.5, 1]
+    crossover_rate = [0, 0.3, 0.6]
 
-    memory_capacity = [2]
-    elite = [0.5]
-    mutation_rate = [0.1]
-    crossover_rate = [0] 
+    # memory_capacity = [2]
+    # elite = [0.5]
+    # mutation_rate = [0.1]
+    # crossover_rate = [0] 
 
     # Create permutations of settings
     sim_settings = itertools.product([n_players], [n_generations], [n_matchups], [n_games],
                                      memory_capacity, elite, mutation_rate, crossover_rate)
     
     # Iterate over simulation settings and run simulations n times
-    n_simulations = 10
+    n_simulations = 3
     for setting in sim_settings:
 
         evaluator = Evaluator(*setting, n_simulations=n_simulations, payoff_matrix=payoff_matrix)
@@ -63,5 +63,5 @@ if __name__ == '__main__':
 
         evaluator.plot_average_fitness()
         evaluator.plot_average_strategies()
-        break
+        # break
 
