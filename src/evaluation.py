@@ -99,6 +99,10 @@ class Evaluator:
                    label='pop. optimum', linestyle = '--', color='springgreen')
         plt.plot(generations, mean_reward, label='pop. average', color='orange', alpha=1)
         plt.fill_between(generations, min_reward, max_reward, alpha=0.3, color='silver', label='ind. min-max')
+        # Plot hostile environment threshold
+        doubledefect_reward = payoff_matrix[1][1][1]
+        plt.hlines(y=doubledefect_reward * n_games * n_matchups, xmin=0, xmax=n_generations-1, 
+                   label='pop. minimum', linestyle = '--', color='red')
         plt.title('Average Fitness of Players over Generations')
         plt.xlabel('nth_generation')
         plt.ylabel('Fitness')
@@ -123,6 +127,8 @@ class Evaluator:
                     played_strategies.add(j)
                 strategy_distributions[j, i] = len(indices)
         strategy_distributions = strategy_distributions[np.any(strategy_distributions !=0, axis=1)]
+        filepath = f'./src/figures/data/stgs_sim_{self.nth_simulation}_{self.file_id}.npy'
+        np.save(filepath, strategy_distributions)
         plt.stackplot(np.arange(n_generations), strategy_distributions, 
                       labels=list(map(STRATEGY_IDS[memory_capacity].get, list(played_strategies))))
         plt.title(f'Distribution of Strategies over Generations')

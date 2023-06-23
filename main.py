@@ -44,7 +44,7 @@ if __name__ == '__main__':
                                      memory_capacity, elite, mutation_rate, crossover_rate)
     
     # Iterate over simulation settings and run simulations n times
-    n_simulations = 3
+    n_simulations = 5
     for setting in sim_settings:
 
         evaluator = Evaluator(*setting, n_simulations=n_simulations, payoff_matrix=payoff_matrix)
